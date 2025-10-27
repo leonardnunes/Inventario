@@ -11,7 +11,7 @@
             {% if perms.core.add_equipamento %}
                 <a href="{% url 'core:importar_csv' %}" class="btn btn-outline-primary">Import CSV</a>
             {% endif %}
-            <a href="{% url 'core:exportar_csv' %}" class="btn btn-outline-Inventario">Exp. Excel</a>
+            <a href="{% url 'core:exportar_csv' %}" class="btn btn-outline-Inventario">Exp. CSV</a>
 
             {% if perms.core.add_equipamento %}
                 <a href="{% url 'core:equipamento_novo' %}" class="btn btn-Inventario-gradient fw-bold">Adicionar</a>
