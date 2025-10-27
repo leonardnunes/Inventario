@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Etiqueta - {{ equipamento.codigo_patrimonio }}</title>
+    <style>
+
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .etiqueta {
+            width: 4cm;
+            height: 3cm;
+            border: 1px solid black;
+            padding: 0.2cm;
+
+
+            margin: 0;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.3cm;
+
+            box-sizing: border-box;
+        }
+
+        .etiqueta .info {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .etiqueta p {
+            margin: 1mm 0;
+        }
+
+        .etiqueta .info .label-patrimonio {
+            font-size: 7pt;
+        }
+
+        .etiqueta .info .codigo-patrimonio {
+            font-size: 10pt
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+
+        .etiqueta img {
+            width: 1.5cm;
+            height: 1.5cm;
+        }
+
+
+        @media print {
+            .etiqueta {
+                border: none;
+            }
+        }
+    </style>
+</head>
+<body onload="window.print()">
+
+    <div class="etiqueta">
+        <div class="info">
+            <p class="label-patrimonio">Patrimônio:</p>
+            <p class="codigo-patrimonio">{{ equipamento.codigo_patrimonio }}</p>
+        </div>
+        <img src="data:image/png;base64,{{ qr_code_image }}" alt="QR Code para {{ equipamento.codigo_patrimonio }}">
+    </div>
+
+</body>
+</html>

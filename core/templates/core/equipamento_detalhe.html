@@ -1,0 +1,57 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Detalhes - {{ equipamento.nome }}{% endblock title %}
+
+{% block content %}
+    <h2 class="mb-4">{{ equipamento.nome }}</h2>
+
+    {% if equipamento.imagem %}
+        <img src="{{ equipamento.imagem.url }}" alt="Foto de {{ equipamento.nome }}" class="img-fluid rounded my-3" style="max-height: 300px;">
+    {% endif %}
+
+    <hr>
+
+    <p class="mb-2"><strong>ID de Estoque:</strong> {{ equipamento.id }}</p>
+    <p class="mb-2"><strong>Código de Patrimônio:</strong> {{ equipamento.codigo_patrimonio }}</p>
+    <p class="mb-2"><strong>Número de Série:</strong> {{ equipamento.numero_serie }}</p>
+
+    <p class="mb-2"><strong>Situação:</strong>
+        <span class="badge
+            {% if equipamento.situacao == 'disponivel' %}bg-success
+            {% elif equipamento.situacao == 'em_uso' %}bg-primary
+            {% elif equipamento.situacao == 'manutencao' %}bg-warning text-dark
+            {% elif equipamento.situacao == 'descartado' %}bg-danger
+            {% else %}bg-secondary{% endif %}">
+            {{ equipamento.get_situacao_display }}
+        </span>
+    </p>
+
+    <p class="mb-2"><strong>Localização:</strong> {{ equipamento.localizacao.nome }}</p>
+    <p class="mb-2"><strong>Categoria:</strong> {{ equipamento.categoria.nome }}</p>
+    {% if equipamento.departamento %}
+        <p class="mb-2"><strong>Departamento:</strong> {{ equipamento.departamento.nome }}</p>
+    {% endif %}
+    <p class="mb-2"><strong>Data de Entrada:</strong> {{ equipamento.data_entrada|date:"d/m/Y" }}</p>
+
+    {% if equipamento.data_saida %}
+        <p class="mb-2"><strong>Data de Saída:</strong> {{ equipamento.data_saida|date:"d/m/Y" }}</p>
+    {% endif %}
+    <p class="mb-2"><strong>Preço Aproximado:</strong> R$ {{ equipamento.preco_aproximado }}</p>
+    <p class="mb-2"><strong>Observações:</strong> {{ equipamento.observacoes|default:"Nenhuma." }}</p>
+    <hr>
+
+    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+        <a href="{% url 'core:lista_equipamentos' %}" class="btn btn-outline-secondary">Voltar para a Lista</a>
+
+        {% if perms.core.change_equipamento %}
+            <a href="{% url 'core:equipamento_editar' pk=equipamento.pk %}" class="btn btn-info">Editar</a>
+        {% endif %}
+
+         {% if perms.core.can_print_label %}
+        <a href="{% url 'core:etiqueta_equipamento' pk=equipamento.pk %}" class="btn btn-success" target="_blank">Imprimir Etiqueta</a>
+         {% endif %}
+        {% if perms.core.delete_equipamento %}
+            <a href="{% url 'core:equipamento_excluir' pk=equipamento.pk %}" class="btn btn-danger">Excluir</a>
+        {% endif %}
+    </div>
+{% endblock content %}

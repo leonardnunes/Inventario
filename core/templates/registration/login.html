@@ -1,0 +1,89 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block navbar %}{% endblock navbar %}
+
+{% block title %}Login - Inventario{% endblock %}
+
+{% block content %}
+
+    <style>
+        /* ESTILOS PADRÃO (PARA TELAS GRANDES / DESKTOP) */
+        .login-main-container {
+            max-width: 800px;
+            margin: auto;
+        }
+
+        #login-logo {
+            width: 600px;
+            height: auto;
+        }
+
+        .form-field-wrapper {
+            max-width: 450px;
+            margin: auto;
+        }
+
+        .forgot-password-link {
+            color: #aaa;
+            text-decoration: none;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+        }
+
+        .forgot-password-link:hover {
+            color: #fff;
+            text-decoration: underline;
+        }
+
+        /* REGRA PARA TELAS MENORES (CELULARES E TABLETS) */
+        @media (max-width: 768px) {
+            .login-main-container {
+                max-width: 95%;
+            }
+
+            #login-logo {
+                width: 70%;
+                max-width: 250px;
+            }
+
+            .form-field-wrapper {
+                max-width: 100%;
+            }
+        }
+    </style>
+
+    <div class="login-main-container">
+
+        <div class="text-center mb-5">
+            <img src="{% static 'core/img/logoSistemaInventario.png' %}" alt="Inventario Logo" id="login-logo">
+        </div>
+
+        {% if form.errors %}
+            <div class="alert alert-danger">
+                Seu usuário ou senha estão incorretos. Tente novamente.
+            </div>
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="mb-3 form-field-wrapper">
+                <label for="id_username" class="form-label">Usuário</label>
+                <input type="text" name="username" id="id_username" class="form-control" required>
+            </div>
+            <div class="mb-3 form-field-wrapper">
+                <label for="id_password" class="form-label">Senha</label>
+                <input type="password" name="password" id="id_password" class="form-control" required>
+            </div>
+            <div class="text-center">
+                <button type="submit" class="btn btn-Inventario-gradient px-4">Entrar</button>
+            </div>
+        </form>
+
+        <div class="text-center mt-4">
+            <a href="{% url 'password_reset' %}" class="forgot-password-link">Esqueci minha senha</a>
+        </div>
+
+    </div>
+
+{% endblock %}

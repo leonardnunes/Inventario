@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Imprimir Etiquetas em Massa</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: sans-serif;
+        }
+        .pagina-impressao {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.1cm;
+            padding: 0.5cm;
+        }
+        .etiqueta {
+            width: 4cm;
+            height: 3cm;
+            border: 1px dotted #ccc;
+            padding: 0.2cm;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.2cm;
+            box-sizing: border-box;
+            page-break-inside: avoid;
+        }
+        .etiqueta .info {
+            text-align: center;
+        }
+        .etiqueta p {
+            margin: 1mm 0;
+        }
+        .etiqueta .info .label-patrimonio {
+            font-size: 7pt;
+        }
+        .etiqueta .info .codigo-patrimonio {
+            font-size: 10pt;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+        .etiqueta img {
+            width: 1.5cm;
+            height: 1.5cm;
+        }
+
+
+        @media print {
+            body {
+                background-color: white;
+            }
+            .pagina-impressao {
+                padding: 0;
+            }
+            .etiqueta {
+                border: none;
+            }
+
+            .no-print {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body onload="window.print()">
+    <div style="text-align: center; padding: 10px;" class="no-print">
+        <h1>Pré-visualização de Impressão</h1>
+        <p>Sua impressão será iniciada automaticamente. Se não iniciar, pressione Ctrl+P (ou Cmd+P).</p>
+        <hr>
+    </div>
+
+    <div class="pagina-impressao">
+        {% for item in equipamentos_com_qr %}
+            <div class="etiqueta">
+                <div class="info">
+                    <p class="label-patrimonio">Patrimônio:</p>
+                    <p class="codigo-patrimonio">{{ item.equipamento.codigo_patrimonio }}</p>
+                </div>
+                <img src="data:image/png;base64,{{ item.qr_code_image }}" alt="QR Code para {{ item.equipamento.codigo_patrimonio }}">
+            </div>
+        {% endfor %}
+    </div>
+</body>
+</html>

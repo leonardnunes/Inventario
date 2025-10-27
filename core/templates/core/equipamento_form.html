@@ -1,0 +1,78 @@
+{% extends 'core/base.html' %}
+
+{% block title %}{% if object %}Editando: {{ object.nome }}{% else %}Adicionar Equipamento{% endif %}{% endblock %}
+
+{% block content %}
+    {% if object %}
+        <h2>Editando: {{ object.nome }}</h2>
+    {% else %}
+        <h2>Adicionar Novo Equipamento</h2>
+    {% endif %}
+    <hr>
+
+    <form method="post" enctype="multipart/form-data">
+
+        {% if form.errors %}
+            <div class="alert alert-danger">
+                <strong>Por favor, corrija os erros abaixo:</strong>
+                <ul>
+                    {% for error in form.non_field_errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                    {% for field in form %}
+                        {% if field.errors %}
+                            <li><strong>{{ field.label }}:</strong> {{ field.errors|striptags }}</li>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+
+        {% csrf_token %}
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">{{ form.nome.label_tag }} {{ form.nome }}</div>
+                <div class="mb-3">{{ form.marca.label_tag }} {{ form.marca }}</div>
+                <div class="mb-3">{{ form.modelo.label_tag }} {{ form.modelo }}</div>
+                <div class="mb-3">{{ form.numero_serie.label_tag }} {{ form.numero_serie }}</div>
+                <div class="mb-3">{{ form.data_entrada.label_tag }} {{ form.data_entrada }}</div>
+                <div class="mb-3">{{ form.preco_aproximado.label_tag }} {{ form.preco_aproximado }}</div>
+                <div class="mb-3">{{ form.imagem.label_tag }} {{ form.imagem }}</div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="mb-3">{{ form.situacao.label_tag }} {{ form.situacao }}</div>
+                <div class="mb-3">{{ form.categoria.label_tag }} {{ form.categoria }}</div>
+                <div class="mb-3">{{ form.localizacao.label_tag }} {{ form.localizacao }}</div>
+
+                <div class="mb-3">{{ form.departamento.label_tag }} {{ form.departamento }}</div>
+
+                <div class="mb-3">{{ form.setor.label_tag }} {{ form.setor }}</div>
+                <div class="mb-3">{{ form.data_saida.label_tag }} {{ form.data_saida }}</div>
+                <div class="mb-3">{{ form.motivo_saida.label_tag }} {{ form.motivo_saida }}</div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                 <div class="mb-3">{{ form.observacoes.label_tag }} {{ form.observacoes }}</div>
+            </div>
+        </div>
+
+        <hr>
+
+        <div class="row">
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-success w-100 mb-2">Salvar</button>
+            </div>
+                    <div class="col-md-3">
+            {% if object %}
+                <a href="{% url 'core:equipamento_detalhe' object.pk %}" class="btn btn-secondary w-100">Cancelar</a>
+            {% else %}
+                <a href="{% url 'core:lista_equipamentos' %}" class="btn btn-secondary w-100">Cancelar</a>
+            {% endif %}
+        </div>
+        </div>
+    </form>
+{% endblock %}

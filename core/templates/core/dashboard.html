@@ -1,0 +1,92 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Dashboard - Inventario{% endblock %}
+
+{% block content %}
+    <h1>Dashboard</h1>
+    <hr>
+
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            <div class="card text-white bg-primary">
+                <div class="card-body">
+                    <h5 class="card-title">Total de Equipamentos</h5>
+                    <p class="card-text fs-2">{{ total_equipamentos }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card text-white bg-success">
+                <div class="card-body">
+                    <h5 class="card-title">Disponíveis</h5>
+                    <p class="card-text fs-2">{{ disponiveis }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card text-white bg-warning">
+                <div class="card-body">
+                    <h5 class="card-title">Em Manutenção</h5>
+                    <p class="card-text fs-2">{{ em_manutencao }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <h3>Equipamentos por Categoria</h3>
+            <canvas id="categoriasChart"></canvas>
+        </div>
+        <div class="col-md-6">
+            <h3>Últimos Itens Adicionados</h3>
+            <ul class="list-group">
+                {% for item in ultimos_adicionados %}
+                <li class="list-group-item bg-transparent text-white">{{ item.nome }} - {{ item.codigo_patrimonio }}</li>
+                {% empty %}
+                <li class="list-group-item bg-transparent text-white">Nenhum equipamento cadastrado.</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const ctx = document.getElementById('categoriasChart').getContext('2d');
+
+        try {
+            const chartLabels = JSON.parse('{{ chart_labels|escapejs }}');
+            const chartValues = JSON.parse('{{ chart_values|escapejs }}');
+            const chartColors = JSON.parse('{{ chart_colors|escapejs }}');
+
+            if (chartLabels.length > 0) {
+                const myChart = new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: chartLabels,
+                        datasets: [{
+                            label: 'Equipamentos',
+                            data: chartValues,
+                            backgroundColor: chartColors,
+                            borderColor: 'rgba(20, 20, 30, 0.85)',
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                labels: {
+                                    color: 'white'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        } catch (e) {
+            console.error("Erro ao renderizar o gráfico:", e);
+        }
+    });
+</script>
+{% endblock %}

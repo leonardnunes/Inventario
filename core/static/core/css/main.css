@@ -1,0 +1,167 @@
+body {
+    background-image: url('../img/Background.png');
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    color: #f8f9fa;
+}
+
+.content-container {
+    background-color: rgba(25, 27, 32, 0.85);
+    padding: 2rem;
+    border-radius: 0.5rem;
+    border: 1px solid #444;
+    max-width: 900px;
+    margin: 2rem auto;
+}
+
+.table {
+    --bs-table-color: #f8f9fa;
+    --bs-table-bg: transparent;
+    --bs-table-border-color: #444;
+    --bs-table-striped-color: #f8f9fa;
+    --bs-table-hover-color: #f8f9fa;
+    --bs-table-hover-bg: rgba(255, 255, 255, 0.1);
+}
+
+body .form-control,
+body .form-select {
+    background-color: #343a40;
+    color: white;
+    border-color: #6c757d;
+}
+
+body .form-control:focus {
+    background-color: #343a40;
+    color: white;
+    border-color: #0d6efd;
+    box-shadow: none;
+}
+
+body .form-control::placeholder,
+body .form-control::-webkit-input-placeholder,
+body .form-control::-moz-placeholder,
+body .form-control:-ms-input-placeholder {
+    color: #aaa !important;
+    opacity: 1;
+}
+
+.search-form {
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.search-bar-custom .form-control {
+    border-right: none;
+}
+
+.search-bar-custom .btn {
+    border-color: #6c757d;
+    color: #a9d7ef;
+}
+
+.search-bar-custom .btn:hover {
+    color: #ffffff;
+}
+
+.search-bar-custom .form-control:focus + .btn {
+    border-color: #0d6efd;
+    box-shadow: none;
+}
+
+.content-container a {
+    color: #a9d7ef;
+    text-decoration: none;
+    font-weight: bold;
+    transition: color 0.2s ease-in-out;
+}
+
+.content-container a:hover {
+    color: #ffffff;
+    text-decoration: underline;
+}
+
+.btn-Inventario-gradient {
+    background: linear-gradient(to right, #33aaff, #0055d4);
+    border-color: #0055d4;
+    color: #ffffff;
+    font-weight: bold;
+    transition: all 0.2s ease-in-out;
+}
+
+.btn-Inventario-gradient:hover {
+    background: linear-gradient(to right, #0055d4, #33aaff);
+    border-color: #33aaff;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.btn-Inventario-gradient:active,
+.btn-Inventario-gradient:focus {
+    background: linear-gradient(to right, #33aaff, #0055d4) !important;
+    border-color: #0055d4 !important;
+    box-shadow: 0 0 0 0.25rem rgba(0, 85, 212, 0.5) !important;
+    transform: none;
+}
+
+.btn-outline-Inventario {
+    border-color: #33aaff;
+    color: #a9d7ef;
+    background-color: transparent;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.btn-outline-Inventario:hover {
+    background: linear-gradient(to right, #33aaff, #0055d4);
+    color: #ffffff;
+    border-color: #33aaff;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.nav-link {
+    display: inline-block;
+    padding: 0rem;
+    border-radius: 0.25rem;
+    text-decoration: none;
+    color: #f8f9fa;
+    background: transparent;
+    transition: all 0.3s ease;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 500;
+}
+
+.nav-link:not(.active):hover {
+    background: linear-gradient(to right, #ADD8E6, #007bff);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    transform: translateY(-1px);
+}
+
+.nav-link.active {
+    font-weight: bold;
+    background: linear-gradient(to right, #ADD8E6, #007bff);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.navbar-brand.active {
+    font-weight: bold;
+    background: linear-gradient(to right, #ADD8E6, #007bff);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+@media (max-width: 768px) {
+    .content-container {
+        max-width: 95%;
+        margin: 1rem auto;
+        padding: 1rem;
+    }
+}
