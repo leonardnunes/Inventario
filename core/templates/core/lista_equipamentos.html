@@ -7,7 +7,12 @@
         <h2 class="mb-3 mb-md-0">Lista de Equipamentos</h2>
 
         <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+
+            {% if perms.core.add_equipamento %}
+                <a href="{% url 'core:importar_csv' %}" class="btn btn-outline-primary">Import CSV</a>
+            {% endif %}
             <a href="{% url 'core:exportar_csv' %}" class="btn btn-outline-Inventario">Exp. Excel</a>
+
             {% if perms.core.add_equipamento %}
                 <a href="{% url 'core:equipamento_novo' %}" class="btn btn-Inventario-gradient fw-bold">Adicionar</a>
             {% endif %}
@@ -95,56 +100,3 @@
     {% endif %}
 
 {% endblock %}
-
-{% block scripts %}
-{{ block.super }}
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const baseUrl = "{% url 'core:imprimir_etiquetas_massa' %}";
-
-    const departamentoSelect = document.getElementById('departamento-select');
-    const printDepartamentoButton = document.getElementById('btn-imprimir-departamento');
-
-    function updatePrintDepartamentoHref() {
-        if (!printDepartamentoButton) return;
-        const departamentoId = departamentoSelect.value;
-        if (departamentoId) {
-            printDepartamentoButton.href = baseUrl + '?departamento=' + departamentoId;
-            printDepartamentoButton.textContent = 'Imprimir Dept.';
-        } else {
-            printDepartamentoButton.href = baseUrl;
-            printDepartamentoButton.textContent = 'Imprimir Todos';
-        }
-    }
-
-    if (departamentoSelect) {
-        departamentoSelect.addEventListener('change', updatePrintDepartamentoHref);
-        updatePrintDepartamentoHref();
-    }
-
-    const intervaloInicioInput = document.getElementById('intervalo-inicio');
-    const intervaloFimInput = document.getElementById('intervalo-fim');
-    const printIntervaloButton = document.getElementById('btn-imprimir-intervalo');
-
-    function updatePrintIntervaloHref() {
-        if (!printIntervaloButton) return;
-        const inicio = intervaloInicioInput.value.trim();
-        const fim = intervaloFimInput.value.trim();
-
-        if (inicio && fim) {
-            printIntervaloButton.href = `${baseUrl}?inicio=${inicio}&fim=${fim}`;
-            printIntervaloButton.classList.remove('disabled');
-        } else {
-            printIntervaloButton.href = "#";
-            printIntervaloButton.classList.add('disabled');
-        }
-    }
-
-    if(intervaloInicioInput && intervaloFimInput) {
-        intervaloInicioInput.addEventListener('input', updatePrintIntervaloHref);
-        intervaloFimInput.addEventListener('input', updatePrintIntervaloHref);
-        updatePrintIntervaloHref();
-    }
-});
-</script>
-{% endblock scripts %}

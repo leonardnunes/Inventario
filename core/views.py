@@ -17,7 +17,14 @@ from django.views.generic import (
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.contrib.auth.decorators import login_required, permission_required
 from django.db.models import Q, Count
-from .models import Equipamento, Departamento
+
+from datetime import datetime
+from decimal import Decimal, InvalidOperation
+from django.contrib import messages
+from django.shortcuts import redirect
+
+
+from .models import Equipamento, Departamento, Categoria, Localizacao
 from .forms import EquipamentoForm
 
 
@@ -110,11 +117,11 @@ class EquipamentoDeleteView(PermissionRequiredMixin, DeleteView):
     template_name = 'core/equipamento_confirm_delete.html'
     success_url = reverse_lazy('core:lista_equipamentos')
 
+
 @permission_required('core.can_print_label', raise_exception=True)
 def etiqueta_equipamento(request, pk):
     equipamento = get_object_or_404(Equipamento, pk=pk)
     url_details = request.build_absolute_uri(equipamento.get_absolute_url())
-
 
     qr = qrcode.QRCode(
         version=1,
@@ -139,13 +146,15 @@ def etiqueta_equipamento(request, pk):
 
 @login_required
 def exportar_csv(request):
+    """
+    Função original para exportar CSV (EXISTENTE).
+    """
     response = HttpResponse(
         content_type='text/csv',
         headers={'Content-Disposition': 'attachment; filename="Inventario_inventario.csv"'},
     )
     response.write(u'\ufeff'.encode('utf8'))
     writer = csv.writer(response, delimiter=';')
-
 
     writer.writerow(['ID', 'Código de Patrimônio', 'Nome', 'Marca', 'Modelo', 'Número de Série', 'Categoria',
                      'Localização', 'Departamento', 'Situação', 'Data de Entrada', 'Data de Saída',
@@ -166,6 +175,138 @@ def exportar_csv(request):
              equipamento.observacoes])
 
     return response
+
+@login_required
+@permission_required('core.add_equipamento', raise_exception=True)
+def importar_csv(request):
+
+
+    SITUACAO_MAP = {
+        display: value
+        for value, display in Equipamento.SITUACAO_CHOICES
+    }
+
+    if request.method == 'GET':
+        return render(request, 'core/importar_equipamentos.html')
+
+    csv_file = request.FILES.get('csv_file')
+
+    if not csv_file:
+        messages.error(request, 'Nenhum arquivo selecionado.')
+        return redirect('core:importar_csv')
+
+    if not csv_file.name.endswith('.csv'):
+        messages.error(request, 'Formato de arquivo inválido. Por favor, envie um .csv')
+        return redirect('core:importar_csv')
+
+    criados_count = 0
+    atualizados_count = 0
+    erros = []
+
+    try:
+        data_set = csv_file.read().decode('utf-8-sig')
+        io_string = io.StringIO(data_set)
+        next(io_string)
+
+        reader = csv.reader(io_string, delimiter=';')
+
+        for i, row in enumerate(reader):
+            linha_num = i + 2
+
+            if not any(row):
+                continue
+
+            try:
+
+                nome = row[2].strip()
+                marca = row[3].strip() or None
+                modelo = row[4].strip() or None
+                numero_serie = row[5].strip() or None
+
+                categoria_nome = row[6].strip()
+                localizacao_nome = row[7].strip()
+                departamento_nome = row[8].strip()
+
+                situacao_display = row[9].strip()
+                data_entrada_str = row[10].strip()
+                data_saida_str = row[11].strip()
+                preco_str = row[12].strip()
+                observacoes = row[13].strip() or None
+
+                situacao_valor = SITUACAO_MAP.get(situacao_display)
+                if not situacao_valor and situacao_display:
+                    raise ValueError(f"Situação '{situacao_display}' inválida.")
+                elif not situacao_valor:
+                    situacao_valor = 'disponivel'
+
+                data_entrada = datetime.strptime(data_entrada_str, '%d/%m/%Y').date() if data_entrada_str else None
+                data_saida = datetime.strptime(data_saida_str, '%d/%m/%Y').date() if data_saida_str else None
+
+                preco_aproximado = Decimal(preco_str.replace(',', '.')) if preco_str else None
+
+                categoria_obj = None
+                if categoria_nome:
+                    categoria_obj, _ = Categoria.objects.get_or_create(nome=categoria_nome)
+
+                localizacao_obj = None
+                if localizacao_nome:
+                    localizacao_obj, _ = Localizacao.objects.get_or_create(nome=localizacao_nome)
+
+                departamento_obj = None
+                if departamento_nome:
+                    departamento_obj, _ = Departamento.objects.get_or_create(nome=departamento_nome)
+
+                defaults = {
+                    'nome': nome,
+                    'marca': marca,
+                    'modelo': modelo,
+                    'categoria': categoria_obj,
+                    'localizacao': localizacao_obj,
+                    'departamento': departamento_obj,
+                    'situacao': situacao_valor,
+                    'data_entrada': data_entrada,
+                    'data_saida': data_saida,
+                    'preco_aproximado': preco_aproximado,
+                    'observacoes': observacoes,
+                }
+
+                if not numero_serie:
+                    Equipamento.objects.create(**defaults)
+                    criados_count += 1
+                else:
+                    obj, created = Equipamento.objects.update_or_create(
+                        numero_serie=numero_serie,
+                        defaults=defaults
+                    )
+                    if created:
+                        criados_count += 1
+                    else:
+                        atualizados_count += 1
+
+            except Exception as e:
+                erros.append(f"Linha {linha_num}: Erro ao processar '{row[2]}'. Detalhe: {e}")
+
+    except Exception as e:
+        messages.error(request, f"Erro fatal ao ler o arquivo: {e}")
+        return redirect('core:importar_csv')
+
+    # --- 8. Feedback Final ---
+    if criados_count > 0:
+        messages.success(request, f'{criados_count} equipamentos foram criados com sucesso.')
+    if atualizados_count > 0:
+        messages.info(request, f'{atualizados_count} equipamentos foram atualizados.')
+    if erros:
+        # Mostra apenas os 5 primeiros erros
+        erros_preview = "; ".join(erros[:5])
+        messages.warning(request,
+                         f"Ocorreram {len(erros)} erros. Ex: [{erros_preview}... (veja o console do servidor para mais detalhes)]")
+
+        print("--- ERROS DE IMPORTAÇÃO CSV ---")
+        for erro in erros:
+            print(erro)
+        print("-------------------------------")
+
+    return redirect('core:importar_csv')
 
 
 @permission_required('core.can_print_label', raise_exception=True)
