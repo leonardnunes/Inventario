@@ -132,7 +132,6 @@ def etiqueta_equipamento(request, pk):
     qr.add_data(url_details)
     qr.make(fit=True)
     qr_img = qr.make_image(fill_color="black", back_color="white")
-    # --- FIM DA ALTERAÇÃO ---
 
     buffer = io.BytesIO()
     qr_img.save(buffer, format='PNG')
@@ -146,9 +145,6 @@ def etiqueta_equipamento(request, pk):
 
 @login_required
 def exportar_csv(request):
-    """
-    Função original para exportar CSV (EXISTENTE).
-    """
     response = HttpResponse(
         content_type='text/csv',
         headers={'Content-Disposition': 'attachment; filename="Inventario_inventario.csv"'},

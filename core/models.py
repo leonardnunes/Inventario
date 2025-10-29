@@ -38,7 +38,7 @@ class Equipamento(models.Model):
     class Meta:
         verbose_name = "Equipamento"
         verbose_name_plural = "Equipamentos"
-        # Permissão adicionada aqui
+
         permissions = [
             ("can_export_csv", "Pode exportar relatórios CSV de equipamentos"),
             ("can_print_label", "Pode imprimir etiquetas de equipamentos"),
