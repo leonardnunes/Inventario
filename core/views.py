@@ -3,12 +3,15 @@ import io
 import json
 from datetime import datetime
 from decimal import Decimal
+from django.utils import timezone
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.db import transaction
-from django.db.models import Q, Count
+from django.db.models import Q, Count, Sum
 from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy, reverse
@@ -22,7 +25,7 @@ from django.views.generic import (
 )
 
 from .forms import EquipamentoForm
-from .models import Equipamento, Departamento, Categoria, Localizacao
+from .models import Equipamento, Departamento, Categoria, Localizacao, HistoricoEquipamento
 from .utils import gerar_qr_code_base64
 
 
@@ -31,15 +34,22 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+
+        # 1. Totalizadores Rápidos
         context['total_equipamentos'] = Equipamento.objects.count()
         context['em_manutencao'] = Equipamento.objects.filter(situacao='manutencao').count()
         context['disponiveis'] = Equipamento.objects.filter(situacao='disponivel').count()
         context['ultimos_adicionados'] = Equipamento.objects.order_by('-id')[:5]
+        context['valor_total'] = Equipamento.objects.aggregate(total=Sum('preco_aproximado'))['total'] or 0
+        context['ultimas_movimentacoes'] = HistoricoEquipamento.objects.all()[:8]
 
         chart_data_queryset = Equipamento.objects.values('categoria__nome').annotate(total=Count('id')).order_by(
             'categoria__nome')
-        chart_labels = [item['categoria__nome'] for item in chart_data_queryset]
+
+        chart_labels = [item['categoria__nome'] if item['categoria__nome'] else 'Sem Categoria' for item in
+                        chart_data_queryset]
         chart_values = [item['total'] for item in chart_data_queryset]
+
         base_colors = [
             'rgba(255, 99, 132, 0.8)', 'rgba(54, 162, 235, 0.8)', 'rgba(255, 206, 86, 0.8)',
             'rgba(75, 192, 192, 0.8)', 'rgba(153, 102, 255, 0.8)', 'rgba(255, 159, 64, 0.8)'
@@ -49,8 +59,8 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         context['chart_labels'] = json.dumps(chart_labels)
         context['chart_values'] = json.dumps(chart_values)
         context['chart_colors'] = json.dumps(chart_colors)
-        return context
 
+        return context
 
 class EquipamentoListView(PermissionRequiredMixin, ListView):
     permission_required = 'core.view_equipamento'
@@ -63,6 +73,7 @@ class EquipamentoListView(PermissionRequiredMixin, ListView):
         queryset = super().get_queryset().select_related('departamento', 'categoria', 'localizacao')
         query = self.request.GET.get('q', '')
         departamento_id = self.request.GET.get('departamento', '')
+        status_param = self.request.GET.get('status', '')
 
         if query:
             queryset = queryset.filter(
@@ -76,13 +87,39 @@ class EquipamentoListView(PermissionRequiredMixin, ListView):
         if departamento_id:
             queryset = queryset.filter(departamento__id=departamento_id)
 
+        if status_param:
+            queryset = queryset.filter(situacao=status_param)
+
         return queryset.order_by('nome')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+
+        query = self.request.GET.get('q', '')
+        departamento_id = self.request.GET.get('departamento', '')
+        qs_contagem = Equipamento.objects.all()
+
+        if query:
+            qs_contagem = qs_contagem.filter(
+                Q(nome__icontains=query) |
+                Q(marca__icontains=query) |
+                Q(modelo__icontains=query) |
+                Q(codigo_patrimonio__icontains=query) |
+                Q(departamento__nome__icontains=query)
+            )
+
+        if departamento_id:
+            qs_contagem = qs_contagem.filter(departamento__id=departamento_id)
+
+        context['total_equipamentos'] = qs_contagem.count()
+        context['total_disponivel'] = qs_contagem.filter(situacao='disponivel').count()
+        context['total_em_uso'] = qs_contagem.filter(situacao='em_uso').count()
+        context['total_manutencao'] = qs_contagem.filter(situacao='manutencao').count()
+        context['status_atual'] = self.request.GET.get('status', '')
         context['departamentos'] = Departamento.objects.all().order_by('nome')
-        context['departamento_selecionado_id'] = self.request.GET.get('departamento', '')
-        context['query_atual'] = self.request.GET.get('q', '')
+        context['departamento_selecionado_id'] = departamento_id
+        context['query_atual'] = query
+
         return context
 
 
@@ -116,20 +153,6 @@ class EquipamentoDeleteView(PermissionRequiredMixin, DeleteView):
     model = Equipamento
     template_name = 'core/equipamento_confirm_delete.html'
     success_url = reverse_lazy('core:lista_equipamentos')
-
-
-@permission_required('core.can_print_label', raise_exception=True)
-def etiqueta_equipamento(request, pk):
-    equipamento = get_object_or_404(Equipamento, pk=pk)
-    url_details = request.build_absolute_uri(equipamento.get_absolute_url())
-
-    qr_code_image = gerar_qr_code_base64(url_details)
-
-    context = {
-        'equipamento': equipamento,
-        'qr_code_image': qr_code_image,
-    }
-    return render(request, 'core/etiqueta.html', context)
 
 
 @login_required
@@ -296,6 +319,22 @@ def importar_csv(request):
     return redirect('core:importar_csv')
 
 
+
+@permission_required('core.can_print_label', raise_exception=True)
+def etiqueta_equipamento(request, pk):
+    equipamento = get_object_or_404(Equipamento, pk=pk)
+    url_details = request.build_absolute_uri(equipamento.get_absolute_url())
+
+    qr_code_image = gerar_qr_code_base64(url_details)
+
+    context = {
+        'equipamento': equipamento,
+        'qr_code_image': qr_code_image,
+    }
+    return render(request, 'core/etiqueta.html', context)
+
+
+
 @permission_required('core.can_print_label', raise_exception=True)
 def imprimir_etiquetas_massa(request):
     inicio = request.GET.get('inicio')
@@ -346,3 +385,83 @@ equipamento_detalhe = EquipamentoDetailView.as_view()
 equipamento_novo = EquipamentoCreateView.as_view()
 equipamento_editar = EquipamentoUpdateView.as_view()
 equipamento_excluir = EquipamentoDeleteView.as_view()
+
+
+
+class RelatorioInventarioView(PermissionRequiredMixin, ListView):
+    permission_required = 'core.view_equipamento'
+    model = Equipamento
+    template_name = 'core/relatorio_inventario.html'
+    context_object_name = 'equipamentos'
+
+    def get_queryset(self):
+        queryset = super().get_queryset().select_related('departamento', 'categoria', 'localizacao')
+        query = self.request.GET.get('q', '')
+        departamento_id = self.request.GET.get('departamento', '')
+        status_param = self.request.GET.get('status', '')
+
+        if query:
+            queryset = queryset.filter(
+                Q(nome__icontains=query) |
+                Q(marca__icontains=query) |
+                Q(modelo__icontains=query) |
+                Q(codigo_patrimonio__icontains=query) |
+                Q(departamento__nome__icontains=query)
+            )
+
+        if departamento_id:
+            queryset = queryset.filter(departamento__id=departamento_id)
+
+        if status_param:
+            queryset = queryset.filter(situacao=status_param)
+
+        return queryset.order_by('nome')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['data_geracao'] = timezone.now()
+        context['total_itens'] = self.get_queryset().count()
+
+        return context
+
+
+@require_POST
+@permission_required('core.add_departamento', raise_exception=True)
+def adicionar_departamento_ajax(request):
+    try:
+        dados = json.loads(request.body)
+        nome = dados.get('nome', '').strip()
+
+        if not nome:
+            return JsonResponse({'sucesso': False, 'erro': 'O nome do departamento é obrigatório.'}, status=400)
+
+        departamento = Departamento.objects.create(nome=nome)
+
+        return JsonResponse({
+            'sucesso': True,
+            'id': departamento.id,
+            'nome': departamento.nome
+        })
+    except Exception as e:
+        return JsonResponse({'sucesso': False, 'erro': str(e)}, status=500)
+
+
+@require_POST
+@permission_required('core.add_categoria', raise_exception=True)
+def adicionar_categoria_ajax(request):
+    try:
+        dados = json.loads(request.body)
+        nome = dados.get('nome', '').strip()
+
+        if not nome:
+            return JsonResponse({'sucesso': False, 'erro': 'O nome da categoria é obrigatório.'}, status=400)
+
+        categoria = Categoria.objects.create(nome=nome)
+
+        return JsonResponse({
+            'sucesso': True,
+            'id': categoria.id,
+            'nome': categoria.nome
+        })
+    except Exception as e:
+        return JsonResponse({'sucesso': False, 'erro': str(e)}, status=500)

@@ -145,23 +145,48 @@
                     </div>
                 </div>
 
-                <div class="d-flex flex-wrap gap-2 mt-auto pt-3 border-top" style="border-color: rgba(255,255,255,0.05) !important;">
+               <div class="d-flex flex-wrap gap-2 mt-auto pt-3 border-top" style="border-color: rgba(255,255,255,0.05) !important;">
                     <a href="{% url 'core:equipamento_editar' equipamento.pk %}" class="btn btn-outline-Inventario px-4">
                         <i class="bi bi-pencil-square me-2"></i>Editar
                     </a>
                     <a href="{% url 'core:etiqueta_equipamento' equipamento.pk %}" class="btn btn-glass px-4" target="_blank">
                         <i class="bi bi-qr-code me-2"></i>Etiqueta
                     </a>
-                     {% if perms.core.delete_equipamento %}
+
+                    {% if perms.core.delete_equipamento %}
                     <div class="ms-auto">
                         <a href="{% url 'core:equipamento_excluir' equipamento.pk %}" class="btn btn-outline-danger px-4">
                             <i class="bi bi-trash me-2"></i>Excluir
                         </a>
                     </div>
+                    {% endif %}
                 </div>
-
             </div>
         </div>
     </div>
+
+    <div class="card border-0 p-4 mt-4 shadow-sm" style="background: rgba(255,255,255,0.02); border-radius: 1.5rem; border: 1px solid rgba(255,255,255,0.03);">
+        <h6 class="text-info text-uppercase small mb-4 fw-bold" style="letter-spacing: 0.05rem;">
+            <i class="bi bi-clock-history me-2"></i>Histórico de Movimentações
+        </h6>
+
+        <div class="position-relative ms-3" style="border-left: 2px solid rgba(255,255,255,0.1);">
+            {% for log in equipamento.historicos.all %}
+                <div class="mb-4 position-relative" style="padding-left: 1.5rem;">
+                    <span class="position-absolute translate-middle rounded-circle" style="width: 12px; height: 12px; background: #38bdf8; left: 0; top: 6px; box-shadow: 0 0 0 4px #0f172a;"></span>
+
+                    <div class="text-muted small mb-1" style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05rem;">
+                        <i class="bi bi-calendar3 me-1"></i>{{ log.data_registro|date:"d M Y - H:i" }}
+                    </div>
+                    <div class="text-light" style="font-size: 0.85rem;">
+                        {{ log.observacao }}
+                    </div>
+                </div>
+            {% empty %}
+                <div class="text-muted small ms-3" style="font-style: italic;">Nenhum registro encontrado para este equipamento.</div>
+            {% endfor %}
+        </div>
+    </div>
+
 </div>
 {% endblock %}

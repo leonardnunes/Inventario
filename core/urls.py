@@ -9,9 +9,11 @@ from .views import (
     etiqueta_equipamento,
     exportar_csv,
     imprimir_etiquetas_massa,
-    importar_csv  # Importação da nova view
+    importar_csv,
+    RelatorioInventarioView,
+    adicionar_departamento_ajax,
+    adicionar_categoria_ajax,
 )
-
 
 app_name = 'core'
 
@@ -26,5 +28,11 @@ urlpatterns = [
     path('<int:pk>/etiqueta/', etiqueta_equipamento, name='etiqueta_equipamento'),
     path('exportar/csv/', exportar_csv, name='exportar_csv'),
     path('etiquetas/massa/', imprimir_etiquetas_massa, name='imprimir_etiquetas_massa'),
+
+    path('relatorio/', RelatorioInventarioView.as_view(), name='gerar_relatorio'),
+
     path('importar/csv/', importar_csv, name='importar_csv'),
+
+    path('api/departamento/adicionar/', adicionar_departamento_ajax, name='api_adicionar_departamento'),
+    path('api/categoria/adicionar/', adicionar_categoria_ajax, name='api_adicionar_categoria'),
 ]

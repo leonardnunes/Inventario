@@ -76,10 +76,67 @@ class Equipamento(models.Model):
 
     def save(self, *args, **kwargs):
         is_new = self.pk is None
+        old_obj = None
+
+        if not is_new:
+            try:
+                old_obj = Equipamento.objects.get(pk=self.pk)
+            except Equipamento.DoesNotExist:
+                old_obj = None
+
         super().save(*args, **kwargs)
+
         if is_new and not self.codigo_patrimonio:
             self.codigo_patrimonio = f'INN-{self.id:06d}'
             super().save(update_fields=['codigo_patrimonio'])
 
+        if is_new:
+            HistoricoEquipamento.objects.create(
+                equipamento=self,
+                observacao="Equipamento cadastrado e patrimônio gerado."
+            )
+        elif old_obj:
+            if old_obj.situacao != self.situacao:
+                HistoricoEquipamento.objects.create(
+                    equipamento=self,
+                    observacao=f"Situação alterada de '{old_obj.get_situacao_display()}' para '{self.get_situacao_display()}'."
+                )
+
+            if old_obj.departamento != self.departamento:
+                depto_antigo = old_obj.departamento.nome if old_obj.departamento else "Nenhum"
+                depto_novo = self.departamento.nome if self.departamento else "Nenhum"
+                HistoricoEquipamento.objects.create(
+                    equipamento=self,
+                    observacao=f"Transferido do departamento '{depto_antigo}' para '{depto_novo}'."
+                )
+
     def get_absolute_url(self):
         return reverse('core:equipamento_detalhe', kwargs={'pk': self.pk})
+
+class HistoricoEquipamento(models.Model):
+    equipamento = models.ForeignKey('Equipamento', on_delete=models.CASCADE, related_name='historicos')
+    observacao = models.CharField(max_length=255)
+    data_registro = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-data_registro']
+        verbose_name = 'Histórico'
+        verbose_name_plural = 'Históricos'
+
+    def __str__(self):
+        return f"{self.data_registro.strftime('%d/%m/%Y %H:%M')} - {self.observacao}"
+
+
+
+class HistoricoEquipamento(models.Model):
+    equipamento = models.ForeignKey('Equipamento', on_delete=models.CASCADE, related_name='historicos')
+    observacao = models.CharField(max_length=255)
+    data_registro = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-data_registro']
+        verbose_name = 'Histórico'
+        verbose_name_plural = 'Históricos'
+
+    def __str__(self):
+        return f"{self.data_registro.strftime('%d/%m/%Y %H:%M')} - {self.observacao}"

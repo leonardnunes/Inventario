@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Relatório de Inventário</title>
+    <style>
+        body { font-family: 'Helvetica', 'Arial', sans-serif; color: #333; margin: 0; padding: 20px; font-size: 12px; }
+        .cabecalho { border-bottom: 2px solid #2c3e50; padding-bottom: 10px; margin-bottom: 20px; }
+        .titulo { font-size: 24px; font-weight: bold; color: #2c3e50; margin: 0; }
+        .info-meta { font-size: 12px; color: #7f8c8d; margin-top: 5px; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th { background-color: #f8f9fa; color: #2c3e50; font-weight: bold; text-align: left; padding: 10px; border-bottom: 2px solid #ddd; text-transform: uppercase; font-size: 11px; }
+        td { padding: 10px; border-bottom: 1px solid #eee; vertical-align: middle; }
+
+        .badge { padding: 3px 8px; border-radius: 12px; font-size: 10px; font-weight: bold; text-transform: uppercase; }
+        .badge-disponivel { background-color: #d1fae5; color: #065f46; }
+        .badge-em-uso { background-color: #dbeafe; color: #1e40af; }
+        .badge-manutencao { background-color: #fef3c7; color: #92400e; }
+        .badge-descartado { background-color: #fee2e2; color: #991b1b; }
+
+        .rodape { margin-top: 40px; border-top: 1px solid #ddd; padding-top: 10px; text-align: center; font-size: 10px; color: #95a5a6; }
+        .assinatura { width: 250px; border-top: 1px solid #333; margin: 50px auto 0; text-align: center; padding-top: 5px; }
+
+        @media print {
+            body { padding: 0; }
+            @page { margin: 1.5cm; size: A4; }
+        }
+    </style>
+</head>
+<body onload="window.print()"> <div class="cabecalho">
+        <h1 class="titulo">Relatório de Inventário Físico</h1>
+        <div class="info-meta">
+            Gerado em: {{ data_geracao|date:"d/m/Y H:i" }} | Total de Itens: {{ total_itens }}
+            {% if request.GET.departamento %} | Filtro: Departamento{% endif %}
+            {% if request.GET.status %} | Filtro: Status ({{ request.GET.status|title }}){% endif %}
+        </div>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th width="15%">Patrimônio</th>
+                <th width="30%">Equipamento</th>
+                <th width="20%">Marca / Modelo</th>
+                <th width="20%">Localização</th>
+                <th width="15%">Situação</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in equipamentos %}
+            <tr>
+                <td><strong>{{ item.codigo_patrimonio|default:"N/D" }}</strong></td>
+                <td>{{ item.nome }}</td>
+                <td>{{ item.marca|default:"-" }} <br><span style="font-size: 10px; color: #7f8c8d;">{{ item.modelo|default:"" }}</span></td>
+                <td>{{ item.departamento.nome|default:"-" }} <br><span style="font-size: 10px; color: #7f8c8d;">{{ item.localizacao.nome|default:"" }}</span></td>
+                <td>
+                    {% if item.situacao == 'disponivel' %}<span class="badge badge-disponivel">Disponível</span>
+                    {% elif item.situacao == 'em_uso' %}<span class="badge badge-em-uso">Em Uso</span>
+                    {% elif item.situacao == 'manutencao' %}<span class="badge badge-manutencao">Manutenção</span>
+                    {% else %}<span class="badge badge-descartado">Descartado</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" style="text-align: center; color: #7f8c8d;">Nenhum equipamento encontrado com estes filtros.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="assinatura">
+        Assinatura do Responsável
+    </div>
+
+    <div class="rodape">
+        Inventário - Sistema de Gestão Patrimonial | Relatório emitido eletronicamente.
+    </div>
+
+</body>
+</html>

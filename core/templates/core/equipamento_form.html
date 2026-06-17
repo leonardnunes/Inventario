@@ -5,7 +5,6 @@
 
 {% block content %}
 <style>
-
     .custom-form-group label {
         color: var(--text-muted);
         font-size: 0.75rem;
@@ -37,6 +36,7 @@
         background-color: #1e293b;
         color: white;
     }
+
     input[type="file"].glass-input {
         padding: 0.45rem 1rem;
         color: var(--text-muted) !important;
@@ -191,17 +191,63 @@
         </div>
     </form>
 </div>
+
+<div class="modal fade" id="modalDepartamento" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="background: #1e293b; border-radius: 1rem;">
+            <div class="modal-header border-bottom-0" style="background: rgba(255,255,255,0.02);">
+                <h5 class="modal-title text-white fw-bold"><i class="bi bi-building me-2 text-info"></i>Novo Departamento</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+                <label class="form-label small text-muted text-uppercase" style="letter-spacing: 0.05rem;">Nome do Departamento</label>
+                <input type="text" id="novo-departamento-nome" class="form-control border-0 text-white" style="background: rgba(255,255,255,0.05);" placeholder="Ex: Som, Multimídia, Diretoria...">
+                <div id="erro-departamento" class="text-danger small mt-2 d-none"><i class="bi bi-exclamation-triangle me-1"></i><span></span></div>
+            </div>
+            <div class="modal-footer border-top-0 pt-0">
+                <button type="button" class="btn btn-sm btn-glass px-4" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-sm btn-Inventario-gradient px-4 shadow-sm" id="btn-salvar-departamento">Salvar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalCategoria" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="background: #1e293b; border-radius: 1rem;">
+            <div class="modal-header border-bottom-0" style="background: rgba(255,255,255,0.02);">
+                <h5 class="modal-title text-white fw-bold"><i class="bi bi-tags me-2 text-warning"></i>Nova Categoria</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+                <label class="form-label small text-muted text-uppercase" style="letter-spacing: 0.05rem;">Nome da Categoria</label>
+                <input type="text" id="nova-categoria-nome" class="form-control border-0 text-white" style="background: rgba(255,255,255,0.05);" placeholder="Ex: Áudio, Instrumentos, Cabos...">
+                <div id="erro-categoria" class="text-danger small mt-2 d-none"><i class="bi bi-exclamation-triangle me-1"></i><span></span></div>
+            </div>
+            <div class="modal-footer border-top-0 pt-0">
+                <button type="button" class="btn btn-sm btn-glass px-4" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-sm btn-Inventario-gradient px-4 shadow-sm" id="btn-salvar-categoria">Salvar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 {% endblock %}
 
 {% block scripts %}
+{{ block.super }}
 <script>
     document.addEventListener("DOMContentLoaded", function() {
-        const formInputs = document.querySelectorAll('input, select, textarea');
 
+        const modalDept = document.getElementById('modalDepartamento');
+        const modalCat = document.getElementById('modalCategoria');
+        if (modalDept) document.body.appendChild(modalDept);
+        if (modalCat) document.body.appendChild(modalCat);
+
+        const formInputs = document.querySelectorAll('input, select, textarea');
         formInputs.forEach(function(input) {
             if (input.type !== 'hidden' && input.type !== 'submit' && input.type !== 'checkbox') {
                 input.classList.add('glass-input');
-
 
                 if(input.tagName === 'SELECT') {
                     input.classList.add('form-select');
@@ -214,6 +260,113 @@
                 }
             }
         });
+
+        function injetarBotaoAdd(selectId, modalTarget) {
+            const selectField = document.getElementById(selectId);
+            if (!selectField) return;
+
+            if (!selectField.parentNode.classList.contains('input-group')) {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'input-group';
+                selectField.parentNode.insertBefore(wrapper, selectField);
+                wrapper.appendChild(selectField);
+            }
+
+            const btn = document.createElement('button');
+            btn.className = 'btn border-start-0';
+            btn.type = 'button';
+            btn.style.background = 'rgba(255, 255, 255, 0.03)';
+            btn.style.borderColor = 'rgba(255, 255, 255, 0.08)';
+            btn.style.borderTopRightRadius = '0.5rem';
+            btn.style.borderBottomRightRadius = '0.5rem';
+            btn.innerHTML = '<i class="bi bi-plus-lg text-info"></i>';
+            btn.setAttribute('data-bs-toggle', 'modal');
+            btn.setAttribute('data-bs-target', modalTarget);
+            btn.title = "Adicionar novo";
+
+            selectField.style.borderTopRightRadius = '0';
+            selectField.style.borderBottomRightRadius = '0';
+
+            selectField.parentNode.appendChild(btn);
+        }
+
+        injetarBotaoAdd('id_departamento', '#modalDepartamento');
+        injetarBotaoAdd('id_categoria', '#modalCategoria');
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        function configurarFormAjax(btnSalvarId, inputNomeId, erroId, selectId, modalId, url) {
+            const btnSalvar = document.getElementById(btnSalvarId);
+            if (!btnSalvar) return;
+
+            btnSalvar.addEventListener('click', function() {
+                const nomeStr = document.getElementById(inputNomeId).value.trim();
+                const erroDiv = document.getElementById(erroId);
+                const erroSpan = erroDiv.querySelector('span');
+
+                if (!nomeStr) {
+                    erroSpan.textContent = "O nome não pode estar vazio.";
+                    erroDiv.classList.remove('d-none');
+                    return;
+                }
+
+                const textoOriginal = btnSalvar.innerHTML;
+                btnSalvar.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Salvando...';
+                btnSalvar.disabled = true;
+
+                fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({ nome: nomeStr })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.sucesso) {
+                        const select = document.getElementById(selectId);
+                        const novaOpcao = new Option(data.nome, data.id, true, true);
+                        select.add(novaOpcao);
+
+                        document.getElementById(inputNomeId).value = '';
+                        erroDiv.classList.add('d-none');
+
+                        const modalEl = document.getElementById(modalId.replace('#', ''));
+                        const modalInst = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+                        modalInst.hide();
+                    } else {
+                        erroSpan.textContent = data.erro || "Erro ao salvar no banco de dados.";
+                        erroDiv.classList.remove('d-none');
+                    }
+                })
+                .catch(error => {
+                    erroSpan.textContent = "Erro de conexão com o servidor.";
+                    erroDiv.classList.remove('d-none');
+                })
+                .finally(() => {
+                    btnSalvar.innerHTML = textoOriginal;
+                    btnSalvar.disabled = false;
+                });
+            });
+        }
+
+        configurarFormAjax('btn-salvar-departamento', 'novo-departamento-nome', 'erro-departamento', 'id_departamento', '#modalDepartamento', "{% url 'core:api_adicionar_departamento' %}");
+        configurarFormAjax('btn-salvar-categoria', 'nova-categoria-nome', 'erro-categoria', 'id_categoria', '#modalCategoria', "{% url 'core:api_adicionar_categoria' %}");
+
     });
 </script>
 {% endblock %}
