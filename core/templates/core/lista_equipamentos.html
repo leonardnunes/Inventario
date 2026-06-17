@@ -1,85 +1,144 @@
 {% extends 'core/base.html' %}
 
-{% block title %}Inventário de Equipamentos - Inventario{% endblock %}
+{% block title %}Inventário de Equipamentos - Inventário{% endblock %}
 
 {% block content %}
-    <div class="d-flex flex-column flex-md-row justify-content-md-between align-items-md-center mb-3">
-        <h2 class="mb-3 mb-md-0">Lista de Equipamentos</h2>
+    <div class="d-flex flex-column flex-md-row justify-content-md-between align-items-md-end mb-4 gap-3">
+        <div>
+            <h2 class="mb-1 fw-bold text-white">Lista de Equipamentos</h2>
+            <p class="text-muted small mb-0">Gerencie e acompanhe todo o acervo do sistema</p>
+        </div>
 
-        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-
+        <div class="d-flex flex-wrap gap-2 justify-content-md-end">
             {% if perms.core.add_equipamento %}
-                <a href="{% url 'core:importar_csv' %}" class="btn btn-outline-primary">Import CSV</a>
+               <a href="{% url 'core:importar_csv' %}" class="btn btn-sm btn-glass px-3">
+                    <i class="bi bi-cloud-arrow-up me-1"></i> Import CSV
+               </a>
             {% endif %}
-            <a href="{% url 'core:exportar_csv' %}" class="btn btn-outline-Inventario">Exp. CSV</a>
+
+            <a href="{% url 'core:exportar_csv' %}" class="btn btn-sm btn-glass px-3">
+                <i class="bi bi-cloud-arrow-down me-1"></i> Exp. CSV
+            </a>
 
             {% if perms.core.add_equipamento %}
-                <a href="{% url 'core:equipamento_novo' %}" class="btn btn-Inventario-gradient fw-bold">Adicionar</a>
+                <a href="{% url 'core:equipamento_novo' %}" class="btn btn-sm btn-Inventario-gradient fw-bold px-4 shadow-sm">
+                    <i class="bi bi-plus-lg me-1"></i> Adicionar
+                </a>
             {% endif %}
         </div>
     </div>
 
-    <form method="GET" action="" class="row g-3 align-items-center mb-4">
-        <div class="col-md-3">
-            <select name="departamento" id="departamento-select" class="form-select">
-                <option value="">Todos os Departamentos</option>
-                {% for depto in departamentos %}
-                    <option value="{{ depto.id }}" {% if depto.id|stringformat:"s" == departamento_selecionado_id %}selected{% endif %}>
-                        {{ depto.nome }}
-                    </option>
-                {% endfor %}
-            </select>
+    <div class="card border-0 mb-4 shadow-sm" style="background: rgba(255,255,255,0.02); border-radius: 1rem;">
+        <div class="card-body p-3">
+            <form method="GET" action="" class="row g-2 align-items-center">
+                <div class="col-md-3">
+                    <select name="departamento" id="departamento-select" class="form-select border-0" style="background: rgba(255,255,255,0.05);">
+                        <option value="">Todos os Departamentos</option>
+                        {% for depto in departamentos %}
+                            <option value="{{ depto.id }}" {% if depto.id|stringformat:"s" == departamento_selecionado_id %}selected{% endif %}>
+                                {{ depto.nome }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-7">
+                    <div class="input-group">
+                        <span class="input-group-text border-0" style="background: rgba(255,255,255,0.05); color: var(--text-muted);">
+                            <i class="bi bi-search"></i>
+                        </span>
+                        <input type="text" name="q" class="form-control border-0" style="background: rgba(255,255,255,0.05);" placeholder="Pesquisar por nome, marca, patrimônio..." value="{{ query_atual }}">
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <button class="btn btn-outline-Inventario w-100" type="submit">Pesquisar</button>
+                </div>
+            </form>
         </div>
-        <div class="col-md-7">
-            <input type="text" name="q" class="form-control" placeholder="Pesquisar..." value="{{ query_atual }}">
-        </div>
-        <div class="col-md-2">
-            <button class="btn btn-Inventario-gradient w-100" type="submit">Pesquisar</button>
-        </div>
-    </form>
-
-    <div class="input-group input-group-sm mb-4">
-      {% if perms.core.can_print_label %}
-        <a href="#" id="btn-imprimir-departamento" class="btn btn-outline-primary fw-bold" target="_blank">Imprimir Todos</a>
-      {% endif %}
-      <input type="text" id="intervalo-inicio" class="form-control" placeholder="De: INN-000001">
-      <input type="text" id="intervalo-fim" class="form-control" placeholder="Até: INN-000100">
-      {% if perms.core.can_print_label %}
-        <a href="#" id="btn-imprimir-intervalo" class="btn btn-Inventario-gradient disabled" target="_blank">Ok</a>
-      {% endif %}
     </div>
 
+    <div class="d-flex flex-wrap align-items-center gap-2 mb-4 p-2 rounded" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05);">
+        <div class="d-flex align-items-center me-auto">
+            <div class="rounded p-2 me-2" style="background: rgba(51, 170, 255, 0.1);">
+                <i class="bi bi-qr-code text-info"></i>
+            </div>
+            <span class="text-muted small fw-medium text-uppercase" style="letter-spacing: 0.05rem;">Impressão em Lote</span>
+        </div>
+
+        <input type="text" id="intervalo-inicio" class="form-control form-control-sm border-0" style="background: rgba(255,255,255,0.05); width: 140px;" placeholder="De: INN-000001">
+        <input type="text" id="intervalo-fim" class="form-control form-control-sm border-0" style="background: rgba(255,255,255,0.05); width: 140px;" placeholder="Até: INN-000100">
+
+        {% if perms.core.can_print_label %}
+            <a href="#" id="btn-imprimir-intervalo" class="btn btn-sm btn-outline-Inventario" target="_blank">Gerar QR</a>
+            <div class="vr mx-1" style="color: rgba(255,255,255,0.2);"></div>
+            <a href="{% url 'core:imprimir_etiquetas_massa' %}{% if request.GET.departamento %}?departamento={{ request.GET.departamento }}{% endif %}"
+               id="btn-imprimir-departamento"
+               class="btn btn-sm btn-glass px-3"
+               target="_blank"
+               title="Gera etiquetas para o intervalo selecionado (Máximo 100 por lote)">
+                Imprimir Lote (Max 100)
+            </a>
+        {% endif %}
+    </div>
 
     <div class="table-responsive">
-        <table class="table table-striped table-hover">
-            <thead class="table-dark">
-                <tr>
-                    <th scope="col">Nome</th>
-                    <th scope="col">Marca / Modelo</th>
-                    <th scope="col">Situação</th>
-                    <th scope="col">Localização</th>
-                    <th scope="col">Departamento</th>
+        <table class="table table-hover align-middle mb-0" style="border-collapse: separate; border-spacing: 0 0.25rem;">
+            <thead>
+                <tr class="text-muted small text-uppercase" style="letter-spacing: 0.05rem;">
+                    <th scope="col" class="border-bottom-0 pb-3 fw-medium">Equipamento</th>
+                    <th scope="col" class="border-bottom-0 pb-3 fw-medium">Marca / Modelo</th>
+                    <th scope="col" class="border-bottom-0 pb-3 fw-medium">Situação</th>
+                    <th scope="col" class="border-bottom-0 pb-3 fw-medium">Local / Depto</th>
                 </tr>
             </thead>
             <tbody>
                 {% for equipamento in equipamentos %}
                 <tr>
-                    <td>
-                        <a href="{% url 'core:equipamento_detalhe' pk=equipamento.pk %}">{{ equipamento.nome }}</a>
+                    <td class="border-bottom-0 py-3">
+                        <a href="{% url 'core:equipamento_detalhe' pk=equipamento.pk %}" class="text-white text-decoration-none fw-semibold" style="transition: color 0.2s;">
+                            {{ equipamento.nome }}
+                        </a>
+                        <br>
+                        <small class="text-muted" style="font-size: 0.75rem;">Patrimônio: {{ equipamento.codigo_patrimonio|default:"Pendente" }}</small>
                     </td>
-                    <td>{{ equipamento.marca }} / {{ equipamento.modelo }}</td>
-                    <td>{{ equipamento.get_situacao_display }}</td>
-                    <td>{{ equipamento.localizacao.nome }}</td>
-                    <td>{{ equipamento.departamento.nome }}</td>
+
+                    <td class="border-bottom-0 py-3">
+                        <span class="text-light">{{ equipamento.marca|default:"-" }}</span><br>
+                        <span class="text-muted small">{{ equipamento.modelo|default:"" }}</span>
+                    </td>
+
+                    <td class="border-bottom-0 py-3">
+                        {% if equipamento.situacao == 'disponivel' %}
+                            <span class="badge rounded-pill fw-normal px-3 py-2" style="background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.2);">Disponível</span>
+                        {% elif equipamento.situacao == 'em_uso' %}
+                            <span class="badge rounded-pill fw-normal px-3 py-2" style="background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.2);">Em Uso</span>
+                        {% elif equipamento.situacao == 'manutencao' %}
+                            <span class="badge rounded-pill fw-normal px-3 py-2" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.2);">Em Manutenção</span>
+                        {% else %}
+                            <span class="badge rounded-pill fw-normal px-3 py-2" style="background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.2);">Descartado</span>
+                        {% endif %}
+                    </td>
+
+                    <td class="border-bottom-0 py-3">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="bi bi-geo-alt text-muted"></i>
+                            <div>
+                                <span class="text-light d-block">{{ equipamento.localizacao.nome|default:"Não definido" }}</span>
+                                <span class="text-muted small">{{ equipamento.departamento.nome|default:"-" }}</span>
+                            </div>
+                        </div>
+                    </td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="5" class="text-center">
-                        {% if request.GET.q or request.GET.departamento %}
-                            Nenhum equipamento encontrado para os filtros aplicados.
-                        {% else %}
-                            Nenhum equipamento cadastrado ainda.
-                        {% endif %}
+                    <td colspan="4" class="text-center py-5 border-bottom-0">
+                        <i class="bi bi-inbox fs-1 d-block mb-3 opacity-50 text-muted"></i>
+                        <span class="text-muted">
+                            {% if request.GET.q or request.GET.departamento %}
+                                Nenhum equipamento encontrado para os filtros aplicados.
+                            {% else %}
+                                Nenhum equipamento cadastrado ainda.
+                            {% endif %}
+                        </span>
                     </td>
                 </tr>
                 {% endfor %}
@@ -89,14 +148,56 @@
 
     {% if is_paginated %}
         {% with q=request.GET.q departamento=request.GET.departamento %}
-        <nav aria-label="Navegação das páginas">
+        <nav aria-label="Navegação das páginas" class="mt-4">
             <ul class="pagination pagination-sm justify-content-center">
-                {% if page_obj.has_previous %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if q %}&q={{ q }}{% endif %}{% if departamento %}&departamento={{ departamento }}{% endif %}" aria-label="Anterior"><span aria-hidden="true">&laquo;</span></a></li>{% else %}<li class="page-item disabled"><span class="page-link">&laquo;</span></li>{% endif %}
-                {% for num in page_obj.paginator.page_range %}{% if page_obj.number == num %}<li class="page-item active" aria-current="page"><span class="page-link">{{ num }}</span></li>{% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}<li class="page-item"><a class="page-link" href="?page={{ num }}{% if q %}&q={{ q }}{% endif %}{% if departamento %}&departamento={{ departamento }}{% endif %}">{{ num }}</a></li>{% endif %}{% endfor %}
-                {% if page_obj.has_next %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if q %}&q={{ q }}{% endif %}{% if departamento %}&departamento={{ departamento }}{% endif %}" aria-label="Próximo"><span aria-hidden="true">&raquo;</span></a></li>{% else %}<li class="page-item disabled"><span class="page-link">&raquo;</span></li>{% endif %}
+                {% if page_obj.has_previous %}
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if q %}&q={{ q }}{% endif %}{% if departamento %}&departamento={{ departamento }}{% endif %}">&laquo;</a></li>
+                {% else %}
+                    <li class="page-item disabled"><span class="page-link">&laquo;</span></li>
+                {% endif %}
+
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                        <li class="page-item active" aria-current="page"><span class="page-link shadow-sm">{{ num }}</span></li>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                        <li class="page-item"><a class="page-link" href="?page={{ num }}{% if q %}&q={{ q }}{% endif %}{% if departamento %}&departamento={{ departamento }}{% endif %}">{{ num }}</a></li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if page_obj.has_next %}
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if q %}&q={{ q }}{% endif %}{% if departamento %}&departamento={{ departamento }}{% endif %}">&raquo;</a></li>
+                {% else %}
+                    <li class="page-item disabled"><span class="page-link">&raquo;</span></li>
+                {% endif %}
             </ul>
         </nav>
         {% endwith %}
     {% endif %}
 
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const btnGerarQR = document.getElementById("btn-imprimir-intervalo");
+        const inputInicio = document.getElementById("intervalo-inicio");
+        const inputFim = document.getElementById("intervalo-fim");
+
+        if(btnGerarQR) {
+            btnGerarQR.addEventListener("click", function(e) {
+                e.preventDefault();
+
+                const inicio = inputInicio.value.trim();
+                const fim = inputFim.value.trim();
+                if(!inicio || !fim) {
+                    alert("Por favor, preencha os dois campos (De / Até) para gerar o lote de etiquetas.");
+                    return;
+                }
+                let urlBase = "{% url 'core:imprimir_etiquetas_massa' %}";
+                let urlFinal = `${urlBase}?inicio=${inicio}&fim=${fim}`;
+                window.open(urlFinal, '_blank');
+            });
+        }
+    });
+</script>
 {% endblock %}

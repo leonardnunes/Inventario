@@ -1,57 +1,167 @@
 {% extends 'core/base.html' %}
+{% load static %}
 
-{% block title %}Detalhes - {{ equipamento.nome }}{% endblock title %}
+{% block title %}{{ equipamento.nome }} - Detalhes - Inventário{% endblock %}
 
 {% block content %}
-    <h2 class="mb-4">{{ equipamento.nome }}</h2>
-
-    {% if equipamento.imagem %}
-        <img src="{{ equipamento.imagem.url }}" alt="Foto de {{ equipamento.nome }}" class="img-fluid rounded my-3" style="max-height: 300px;">
-    {% endif %}
-
-    <hr>
-
-    <p class="mb-2"><strong>ID de Estoque:</strong> {{ equipamento.id }}</p>
-    <p class="mb-2"><strong>Código de Patrimônio:</strong> {{ equipamento.codigo_patrimonio }}</p>
-    <p class="mb-2"><strong>Número de Série:</strong> {{ equipamento.numero_serie }}</p>
-
-    <p class="mb-2"><strong>Situação:</strong>
-        <span class="badge
-            {% if equipamento.situacao == 'disponivel' %}bg-success
-            {% elif equipamento.situacao == 'em_uso' %}bg-primary
-            {% elif equipamento.situacao == 'manutencao' %}bg-warning text-dark
-            {% elif equipamento.situacao == 'descartado' %}bg-danger
-            {% else %}bg-secondary{% endif %}">
-            {{ equipamento.get_situacao_display }}
-        </span>
-    </p>
-
-    <p class="mb-2"><strong>Localização:</strong> {{ equipamento.localizacao.nome }}</p>
-    <p class="mb-2"><strong>Categoria:</strong> {{ equipamento.categoria.nome }}</p>
-    {% if equipamento.departamento %}
-        <p class="mb-2"><strong>Departamento:</strong> {{ equipamento.departamento.nome }}</p>
-    {% endif %}
-    <p class="mb-2"><strong>Data de Entrada:</strong> {{ equipamento.data_entrada|date:"d/m/Y" }}</p>
-
-    {% if equipamento.data_saida %}
-        <p class="mb-2"><strong>Data de Saída:</strong> {{ equipamento.data_saida|date:"d/m/Y" }}</p>
-    {% endif %}
-    <p class="mb-2"><strong>Preço Aproximado:</strong> R$ {{ equipamento.preco_aproximado }}</p>
-    <p class="mb-2"><strong>Observações:</strong> {{ equipamento.observacoes|default:"Nenhuma." }}</p>
-    <hr>
-
-    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-        <a href="{% url 'core:lista_equipamentos' %}" class="btn btn-outline-secondary">Voltar para a Lista</a>
-
-        {% if perms.core.change_equipamento %}
-            <a href="{% url 'core:equipamento_editar' pk=equipamento.pk %}" class="btn btn-info">Editar</a>
-        {% endif %}
-
-         {% if perms.core.can_print_label %}
-        <a href="{% url 'core:etiqueta_equipamento' pk=equipamento.pk %}" class="btn btn-success" target="_blank">Imprimir Etiqueta</a>
-         {% endif %}
-        {% if perms.core.delete_equipamento %}
-            <a href="{% url 'core:equipamento_excluir' pk=equipamento.pk %}" class="btn btn-danger">Excluir</a>
-        {% endif %}
+<div class="container py-2">
+    <div class="d-flex align-items-center mb-4">
+        <a href="{% url 'core:lista_equipamentos' %}" class="btn btn-glass btn-sm me-3">
+            <i class="bi bi-arrow-left"></i>
+        </a>
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1" style="font-size: 0.75rem; letter-spacing: 0.05rem; text-uppercase: true;">
+                    <li class="breadcrumb-item"><a href="{% url 'core:lista_equipamentos' %}" class="text-muted text-decoration-none text-uppercase">Equipamentos</a></li>
+                    <li class="breadcrumb-item active text-info text-uppercase" aria-current="page">Detalhes</li>
+                </ol>
+            </nav>
+            <h2 class="fw-bold text-white mb-0">{{ equipamento.nome }}</h2>
+        </div>
     </div>
-{% endblock content %}
+
+    <div class="row g-4">
+        <div class="col-lg-4">
+            <div class="card border-0 p-3 h-100 shadow-lg" style="background: rgba(255,255,255,0.02); border-radius: 1.5rem; border: 1px solid rgba(255,255,255,0.05);">
+                <div class="position-relative">
+                    {% if equipamento.imagem %}
+                        <img src="{{ equipamento.imagem.url }}" class="img-fluid rounded-4 shadow" alt="{{ equipamento.nome }}" style="width: 100%; height: 320px; object-fit: cover;">
+                    {% else %}
+                        <div class="d-flex flex-column align-items-center justify-content-center rounded-4" style="height: 320px; background: rgba(0,0,0,0.2); border: 2px dashed rgba(255,255,255,0.05);">
+                            <i class="bi bi-image fs-1 text-muted opacity-25"></i>
+                            <span class="text-muted small mt-2">Sem foto cadastrada</span>
+                        </div>
+                    {% endif %}
+
+                    <div class="position-absolute top-0 end-0 m-3">
+                        {% if equipamento.situacao == 'disponivel' %}
+                            <span class="badge rounded-pill px-3 py-2 fw-semibold" style="background: rgba(15, 23, 42, 0.65); color: #34d399; border: 1px solid #10b981; backdrop-filter: blur(8px); box-shadow: 0 4px 10px rgba(0,0,0,0.3);">Disponível</span>
+                        {% elif equipamento.situacao == 'em_uso' %}
+                            <span class="badge rounded-pill px-3 py-2 fw-semibold" style="background: rgba(15, 23, 42, 0.65); color: #a5b4fc; border: 1px solid #4f46e5; backdrop-filter: blur(8px); box-shadow: 0 4px 10px rgba(0,0,0,0.3);">Em Uso</span>
+                        {% elif equipamento.situacao == 'manutencao' %}
+                            <span class="badge rounded-pill px-3 py-2 fw-semibold" style="background: rgba(15, 23, 42, 0.65); color: #fbbf24; border: 1px solid #f59e0b; backdrop-filter: blur(8px); box-shadow: 0 4px 10px rgba(0,0,0,0.3);">Manutenção</span>
+                        {% else %}
+                            <span class="badge rounded-pill px-3 py-2 fw-semibold" style="background: rgba(15, 23, 42, 0.65); color: #f87171; border: 1px solid #ef4444; backdrop-filter: blur(8px); box-shadow: 0 4px 10px rgba(0,0,0,0.3);">Descartado</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="mt-4 p-3 rounded-4" style="background: rgba(0,0,0,0.15);">
+                    <div class="row text-center">
+                        <div class="col-6 border-end" style="border-color: rgba(255,255,255,0.05) !important;">
+                            <small class="text-muted d-block mb-1 text-uppercase fw-semibold" style="font-size: 0.65rem; letter-spacing: 0.05rem;">Patrimônio</small>
+                            <span class="text-white fw-bold fs-5">{{ equipamento.codigo_patrimonio|default:"-" }}</span>
+                        </div>
+                        <div class="col-6">
+                            <small class="text-muted d-block mb-1 text-uppercase fw-semibold" style="font-size: 0.65rem; letter-spacing: 0.05rem;">ID Interno</small>
+                            <span class="text-white fw-bold fs-5">#{{ equipamento.id }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+            <div class="card border-0 p-4 h-100 shadow-lg" style="background: rgba(255,255,255,0.02); border-radius: 1.5rem; border: 1px solid rgba(255,255,255,0.05);">
+
+                <div class="row g-4 mb-4">
+                    <div class="col-md-6">
+                        <h6 class="text-info text-uppercase small mb-3 fw-bold" style="letter-spacing: 0.05rem;">
+                            <i class="bi bi-cpu me-2"></i>Técnico
+                        </h6>
+                        <div class="mb-3">
+                            <label class="text-muted small d-block fw-semibold" style="font-size: 0.75rem;">Número de Série</label>
+                            <span class="text-white fw-medium">{{ equipamento.numero_serie|default:"N/A" }}</span>
+                        </div>
+                        <div class="mb-3">
+                            <label class="text-muted small d-block fw-semibold" style="font-size: 0.75rem;">Marca / Modelo</label>
+                            <span class="text-white fw-medium">{{ equipamento.marca|default:"-" }} / {{ equipamento.modelo|default:"-" }}</span>
+                        </div>
+                        <div class="mb-3">
+                            <label class="text-muted small d-block fw-semibold" style="font-size: 0.75rem;">Categoria</label>
+                            <span class="text-white fw-medium">{{ equipamento.categoria.nome|default:"-" }}</span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <h6 class="text-info text-uppercase small mb-3 fw-bold" style="letter-spacing: 0.05rem;">
+                            <i class="bi bi-geo-alt me-2"></i>Logística
+                        </h6>
+                        <div class="mb-3">
+                            <label class="text-muted small d-block fw-semibold" style="font-size: 0.75rem;">Localização</label>
+                            <span class="text-white fw-medium">{{ equipamento.localizacao.nome|default:"-" }}</span>
+                        </div>
+                        <div class="mb-3">
+                            <label class="text-muted small d-block fw-semibold" style="font-size: 0.75rem;">Departamento</label>
+                            <span class="text-white fw-medium">{{ equipamento.departamento.nome|default:"-" }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="my-4" style="border-color: rgba(255,255,255,0.05);">
+
+                <div class="row g-4 mb-4">
+                    <div class="col-md-6">
+                        <h6 class="text-info text-uppercase small mb-3 fw-bold" style="letter-spacing: 0.05rem;">
+                            <i class="bi bi-calendar-event me-2"></i>Cronologia
+                        </h6>
+                        <div class="d-flex align-items-center gap-3 mb-3">
+                            <div class="text-center p-2 rounded flex-fill" style="background: rgba(255,255,255,0.03);">
+                                <small class="text-muted d-block small fw-semibold" style="font-size: 0.65rem;">ENTRADA</small>
+                                <span class="text-white small">{{ equipamento.data_entrada|date:"d/m/Y"|default:"-" }}</span>
+                            </div>
+                            <i class="bi bi-arrow-right text-muted opacity-50"></i>
+                            <div class="text-center p-2 rounded flex-fill" style="background: rgba(255,255,255,0.03);">
+                                <small class="text-muted d-block small fw-semibold" style="font-size: 0.65rem;">SAÍDA</small>
+                                <span class="text-white small">{{ equipamento.data_saida|date:"d/m/Y"|default:"---" }}</span>
+                            </div>
+                        </div>
+
+                        {% if equipamento.motivo_saida %}
+                        <div class="p-2 rounded" style="background: rgba(239, 68, 68, 0.05); border-left: 3px solid rgba(239, 68, 68, 0.5);">
+                            <label class="text-muted small d-block fw-semibold" style="font-size: 0.7rem;">Motivo da Saída</label>
+                            <span class="text-white small">{{ equipamento.motivo_saida }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="col-md-6">
+                        <h6 class="text-info text-uppercase small mb-3 fw-bold" style="letter-spacing: 0.05rem;">
+                            <i class="bi bi-currency-dollar me-2"></i>Financeiro
+                        </h6>
+                        <div class="p-3 rounded-3" style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05);">
+                            <label class="text-muted small d-block fw-semibold" style="font-size: 0.75rem;">Preço Aproximado</label>
+                            <span class="text-white fw-bold fs-5">R$ {{ equipamento.preco_aproximado|default:"0,00" }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <h6 class="text-muted text-uppercase small mb-2 fw-bold" style="letter-spacing: 0.05rem;">Observações</h6>
+                    <div class="p-3 rounded" style="background: rgba(0,0,0,0.2); min-height: 60px;">
+                        <p class="text-white small mb-0 opacity-75">
+                            {{ equipamento.observacoes|default:"Nenhuma observação registrada para este equipamento." }}
+                        </p>
+                    </div>
+                </div>
+
+                <div class="d-flex flex-wrap gap-2 mt-auto pt-3 border-top" style="border-color: rgba(255,255,255,0.05) !important;">
+                    <a href="{% url 'core:equipamento_editar' equipamento.pk %}" class="btn btn-outline-Inventario px-4">
+                        <i class="bi bi-pencil-square me-2"></i>Editar
+                    </a>
+                    <a href="{% url 'core:etiqueta_equipamento' equipamento.pk %}" class="btn btn-glass px-4" target="_blank">
+                        <i class="bi bi-qr-code me-2"></i>Etiqueta
+                    </a>
+                     {% if perms.core.delete_equipamento %}
+                    <div class="ms-auto">
+                        <a href="{% url 'core:equipamento_excluir' equipamento.pk %}" class="btn btn-outline-danger px-4">
+                            <i class="bi bi-trash me-2"></i>Excluir
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

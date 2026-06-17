@@ -1,10 +1,16 @@
 import csv
-from django.http import HttpResponse
-import json
-import qrcode
 import io
-import base64
-from django.shortcuts import render, get_object_or_404
+import json
+from datetime import datetime
+from decimal import Decimal
+
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required, permission_required
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.db import transaction
+from django.db.models import Q, Count
+from django.http import HttpResponse
+from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy, reverse
 from django.views.generic import (
     ListView,
@@ -14,18 +20,10 @@ from django.views.generic import (
     DeleteView,
     TemplateView
 )
-from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
-from django.contrib.auth.decorators import login_required, permission_required
-from django.db.models import Q, Count
 
-from datetime import datetime
-from decimal import Decimal, InvalidOperation
-from django.contrib import messages
-from django.shortcuts import redirect
-
-
-from .models import Equipamento, Departamento, Categoria, Localizacao
 from .forms import EquipamentoForm
+from .models import Equipamento, Departamento, Categoria, Localizacao
+from .utils import gerar_qr_code_base64
 
 
 class DashboardView(LoginRequiredMixin, TemplateView):
@@ -37,6 +35,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         context['em_manutencao'] = Equipamento.objects.filter(situacao='manutencao').count()
         context['disponiveis'] = Equipamento.objects.filter(situacao='disponivel').count()
         context['ultimos_adicionados'] = Equipamento.objects.order_by('-id')[:5]
+
         chart_data_queryset = Equipamento.objects.values('categoria__nome').annotate(total=Count('id')).order_by(
             'categoria__nome')
         chart_labels = [item['categoria__nome'] for item in chart_data_queryset]
@@ -46,6 +45,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             'rgba(75, 192, 192, 0.8)', 'rgba(153, 102, 255, 0.8)', 'rgba(255, 159, 64, 0.8)'
         ]
         chart_colors = [base_colors[i % len(base_colors)] for i in range(len(chart_labels))]
+
         context['chart_labels'] = json.dumps(chart_labels)
         context['chart_values'] = json.dumps(chart_values)
         context['chart_colors'] = json.dumps(chart_colors)
@@ -60,7 +60,7 @@ class EquipamentoListView(PermissionRequiredMixin, ListView):
     paginate_by = 50
 
     def get_queryset(self):
-        queryset = super().get_queryset()
+        queryset = super().get_queryset().select_related('departamento', 'categoria', 'localizacao')
         query = self.request.GET.get('q', '')
         departamento_id = self.request.GET.get('departamento', '')
 
@@ -123,19 +123,8 @@ def etiqueta_equipamento(request, pk):
     equipamento = get_object_or_404(Equipamento, pk=pk)
     url_details = request.build_absolute_uri(equipamento.get_absolute_url())
 
-    qr = qrcode.QRCode(
-        version=1,
-        error_correction=qrcode.constants.ERROR_CORRECT_L,
-        box_size=6,
-        border=2,
-    )
-    qr.add_data(url_details)
-    qr.make(fit=True)
-    qr_img = qr.make_image(fill_color="black", back_color="white")
+    qr_code_image = gerar_qr_code_base64(url_details)
 
-    buffer = io.BytesIO()
-    qr_img.save(buffer, format='PNG')
-    qr_code_image = base64.b64encode(buffer.getvalue()).decode()
     context = {
         'equipamento': equipamento,
         'qr_code_image': qr_code_image,
@@ -156,30 +145,35 @@ def exportar_csv(request):
                      'Localização', 'Departamento', 'Situação', 'Data de Entrada', 'Data de Saída',
                      'Preço Aproximado', 'Observações'])
 
-    equipamentos = Equipamento.objects.all()
+    equipamentos = Equipamento.objects.select_related('categoria', 'localizacao', 'departamento').all()
+
     for equipamento in equipamentos:
-        writer.writerow(
-            [equipamento.id, equipamento.codigo_patrimonio, equipamento.nome, equipamento.marca, equipamento.modelo,
-             equipamento.numero_serie,
-             equipamento.categoria.nome if equipamento.categoria else '',
-             equipamento.localizacao.nome if equipamento.localizacao else '',
-             equipamento.departamento.nome if equipamento.departamento else '',
-             equipamento.get_situacao_display(),
-             equipamento.data_entrada.strftime('%d/%m/%Y') if equipamento.data_entrada else '',
-             equipamento.data_saida.strftime('%d/%m/%Y') if equipamento.data_saida else '',
-             equipamento.preco_aproximado,
-             equipamento.observacoes])
+        writer.writerow([
+            equipamento.id,
+            equipamento.codigo_patrimonio,
+            equipamento.nome,
+            equipamento.marca,
+            equipamento.modelo,
+            equipamento.numero_serie,
+            equipamento.categoria.nome if equipamento.categoria else '',
+            equipamento.localizacao.nome if equipamento.localizacao else '',
+            equipamento.departamento.nome if equipamento.departamento else '',
+            equipamento.get_situacao_display(),
+            equipamento.data_entrada.strftime('%d/%m/%Y') if equipamento.data_entrada else '',
+            equipamento.data_saida.strftime('%d/%m/%Y') if equipamento.data_saida else '',
+            equipamento.preco_aproximado,
+            equipamento.observacoes
+        ])
 
     return response
+
 
 @login_required
 @permission_required('core.add_equipamento', raise_exception=True)
 def importar_csv(request):
-
-
     SITUACAO_MAP = {
         display: value
-        for value, display in Equipamento.SITUACAO_CHOICES
+        for value, display in Equipamento.Situacao.choices
     }
 
     if request.method == 'GET':
@@ -205,94 +199,91 @@ def importar_csv(request):
         next(io_string)
 
         reader = csv.reader(io_string, delimiter=';')
+        with transaction.atomic():
+            for i, row in enumerate(reader):
+                linha_num = i + 2
 
-        for i, row in enumerate(reader):
-            linha_num = i + 2
+                if not any(row):
+                    continue
 
-            if not any(row):
-                continue
+                try:
+                    nome = row[2].strip()
+                    marca = row[3].strip() or None
+                    modelo = row[4].strip() or None
+                    numero_serie = row[5].strip() or None
 
-            try:
+                    categoria_nome = row[6].strip()
+                    localizacao_nome = row[7].strip()
+                    departamento_nome = row[8].strip()
 
-                nome = row[2].strip()
-                marca = row[3].strip() or None
-                modelo = row[4].strip() or None
-                numero_serie = row[5].strip() or None
+                    situacao_display = row[9].strip()
+                    data_entrada_str = row[10].strip()
+                    data_saida_str = row[11].strip()
+                    preco_str = row[12].strip()
+                    observacoes = row[13].strip() or None
 
-                categoria_nome = row[6].strip()
-                localizacao_nome = row[7].strip()
-                departamento_nome = row[8].strip()
+                    situacao_valor = SITUACAO_MAP.get(situacao_display)
+                    if not situacao_valor and situacao_display:
+                        raise ValueError(f"Situação '{situacao_display}' inválida.")
+                    elif not situacao_valor:
+                        situacao_valor = 'disponivel'
 
-                situacao_display = row[9].strip()
-                data_entrada_str = row[10].strip()
-                data_saida_str = row[11].strip()
-                preco_str = row[12].strip()
-                observacoes = row[13].strip() or None
+                    data_entrada = datetime.strptime(data_entrada_str, '%d/%m/%Y').date() if data_entrada_str else None
+                    data_saida = datetime.strptime(data_saida_str, '%d/%m/%Y').date() if data_saida_str else None
 
-                situacao_valor = SITUACAO_MAP.get(situacao_display)
-                if not situacao_valor and situacao_display:
-                    raise ValueError(f"Situação '{situacao_display}' inválida.")
-                elif not situacao_valor:
-                    situacao_valor = 'disponivel'
+                    preco_aproximado = Decimal(preco_str.replace(',', '.')) if preco_str else None
 
-                data_entrada = datetime.strptime(data_entrada_str, '%d/%m/%Y').date() if data_entrada_str else None
-                data_saida = datetime.strptime(data_saida_str, '%d/%m/%Y').date() if data_saida_str else None
+                    categoria_obj = None
+                    if categoria_nome:
+                        categoria_obj, _ = Categoria.objects.get_or_create(nome=categoria_nome)
 
-                preco_aproximado = Decimal(preco_str.replace(',', '.')) if preco_str else None
+                    localizacao_obj = None
+                    if localizacao_nome:
+                        localizacao_obj, _ = Localizacao.objects.get_or_create(nome=localizacao_nome)
 
-                categoria_obj = None
-                if categoria_nome:
-                    categoria_obj, _ = Categoria.objects.get_or_create(nome=categoria_nome)
+                    departamento_obj = None
+                    if departamento_nome:
+                        departamento_obj, _ = Departamento.objects.get_or_create(nome=departamento_nome)
 
-                localizacao_obj = None
-                if localizacao_nome:
-                    localizacao_obj, _ = Localizacao.objects.get_or_create(nome=localizacao_nome)
+                    defaults = {
+                        'nome': nome,
+                        'marca': marca,
+                        'modelo': modelo,
+                        'categoria': categoria_obj,
+                        'localizacao': localizacao_obj,
+                        'departamento': departamento_obj,
+                        'situacao': situacao_valor,
+                        'data_entrada': data_entrada,
+                        'data_saida': data_saida,
+                        'preco_aproximado': preco_aproximado,
+                        'observacoes': observacoes,
+                    }
 
-                departamento_obj = None
-                if departamento_nome:
-                    departamento_obj, _ = Departamento.objects.get_or_create(nome=departamento_nome)
-
-                defaults = {
-                    'nome': nome,
-                    'marca': marca,
-                    'modelo': modelo,
-                    'categoria': categoria_obj,
-                    'localizacao': localizacao_obj,
-                    'departamento': departamento_obj,
-                    'situacao': situacao_valor,
-                    'data_entrada': data_entrada,
-                    'data_saida': data_saida,
-                    'preco_aproximado': preco_aproximado,
-                    'observacoes': observacoes,
-                }
-
-                if not numero_serie:
-                    Equipamento.objects.create(**defaults)
-                    criados_count += 1
-                else:
-                    obj, created = Equipamento.objects.update_or_create(
-                        numero_serie=numero_serie,
-                        defaults=defaults
-                    )
-                    if created:
+                    if not numero_serie:
+                        Equipamento.objects.create(**defaults)
                         criados_count += 1
                     else:
-                        atualizados_count += 1
+                        obj, created = Equipamento.objects.update_or_create(
+                            numero_serie=numero_serie,
+                            defaults=defaults
+                        )
+                        if created:
+                            criados_count += 1
+                        else:
+                            atualizados_count += 1
 
-            except Exception as e:
-                erros.append(f"Linha {linha_num}: Erro ao processar '{row[2]}'. Detalhe: {e}")
+                except Exception as e:
+                    erros.append(f"Linha {linha_num}: Erro ao processar '{row[2]}'. Detalhe: {e}")
 
     except Exception as e:
         messages.error(request, f"Erro fatal ao ler o arquivo: {e}")
         return redirect('core:importar_csv')
 
-    # --- 8. Feedback Final ---
     if criados_count > 0:
         messages.success(request, f'{criados_count} equipamentos foram criados com sucesso.')
     if atualizados_count > 0:
         messages.info(request, f'{atualizados_count} equipamentos foram atualizados.')
     if erros:
-        # Mostra apenas os 5 primeiros erros
         erros_preview = "; ".join(erros[:5])
         messages.warning(request,
                          f"Ocorreram {len(erros)} erros. Ex: [{erros_preview}... (veja o console do servidor para mais detalhes)]")
@@ -309,28 +300,34 @@ def importar_csv(request):
 def imprimir_etiquetas_massa(request):
     inicio = request.GET.get('inicio')
     fim = request.GET.get('fim')
-
     departamento_id = request.GET.get('departamento')
-
-    equipamentos_qs = Equipamento.objects.all()
+    equipamentos_qs = Equipamento.objects.select_related('departamento', 'localizacao', 'categoria').all()
 
     if inicio and fim:
         equipamentos_qs = equipamentos_qs.filter(codigo_patrimonio__gte=inicio, codigo_patrimonio__lte=fim)
     elif departamento_id:
         equipamentos_qs = equipamentos_qs.filter(departamento__id=departamento_id)
 
+    equipamentos_qs = equipamentos_qs.order_by('codigo_patrimonio')
+
+    LIMITE_MAXIMO = 100
+    total_solicitado = equipamentos_qs.count()
+
+    if total_solicitado > LIMITE_MAXIMO:
+        messages.warning(
+            request,
+            f"Você tentou gerar {total_solicitado} etiquetas. O limite de segurança do sistema é de {LIMITE_MAXIMO} por lote para evitar travamentos. Por favor, diminua o intervalo."
+        )
+        return redirect('core:lista_equipamentos')
+
+    elif total_solicitado == 0:
+        messages.info(request, "Nenhum equipamento foi encontrado para este intervalo.")
+        return redirect('core:lista_equipamentos')
+
     equipamentos_com_qr = []
-    for equipamento in equipamentos_qs.order_by('codigo_patrimonio'):
+    for equipamento in equipamentos_qs:
         url_details = request.build_absolute_uri(equipamento.get_absolute_url())
-
-        qr = qrcode.QRCode(version=1, error_correction=qrcode.constants.ERROR_CORRECT_L, box_size=6, border=2)
-        qr.add_data(url_details)
-        qr.make(fit=True)
-        qr_img = qr.make_image(fill_color="black", back_color="white")
-
-        buffer = io.BytesIO()
-        qr_img.save(buffer, format='PNG')
-        qr_code_image = base64.b64encode(buffer.getvalue()).decode()
+        qr_code_image = gerar_qr_code_base64(url_details)
 
         equipamentos_com_qr.append({
             'equipamento': equipamento,
@@ -341,6 +338,7 @@ def imprimir_etiquetas_massa(request):
         'equipamentos_com_qr': equipamentos_com_qr
     }
     return render(request, 'core/etiquetas_massa.html', context)
+
 
 dashboard = DashboardView.as_view()
 lista_equipamentos = EquipamentoListView.as_view()

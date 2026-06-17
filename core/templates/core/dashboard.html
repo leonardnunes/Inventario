@@ -1,52 +1,99 @@
 {% extends 'core/base.html' %}
 
-{% block title %}Dashboard - Inventario{% endblock %}
+{% block title %}Dashboard - Inventário{% endblock %}
 
 {% block content %}
-    <h1>Dashboard</h1>
-    <hr>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-0 text-white">Visão Geral</h2>
+            <p class="text-muted small">Acompanhamento em tempo real do acervo</p>
+        </div>
+    </div>
 
-    <div class="row">
-        <div class="col-md-4 mb-3">
-            <div class="card text-white bg-primary">
-                <div class="card-body">
-                    <h5 class="card-title">Total de Equipamentos</h5>
-                    <p class="card-text fs-2">{{ total_equipamentos }}</p>
+    <div class="row g-4 mb-5">
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm" style="background: rgba(255, 255, 255, 0.03); border-radius: 1rem; border-left: 4px solid var(--brand-light) !important;">
+                <div class="card-body p-4 d-flex justify-content-between align-items-center">
+                    <div>
+                        <p class="text-muted text-uppercase small fw-semibold mb-1" style="letter-spacing: 0.05rem;">Total de Equipamentos</p>
+                        <h3 class="display-5 fw-bold text-white mb-0">{{ total_equipamentos }}</h3>
+                    </div>
+                    <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 54px; height: 54px; background: rgba(51, 170, 255, 0.1); color: var(--brand-light);">
+                        <i class="bi bi-box-seam fs-3"></i>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-4 mb-3">
-            <div class="card text-white bg-success">
-                <div class="card-body">
-                    <h5 class="card-title">Disponíveis</h5>
-                    <p class="card-text fs-2">{{ disponiveis }}</p>
+
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm" style="background: rgba(255, 255, 255, 0.03); border-radius: 1rem; border-left: 4px solid #10b981 !important;">
+                <div class="card-body p-4 d-flex justify-content-between align-items-center">
+                    <div>
+                        <p class="text-muted text-uppercase small fw-semibold mb-1" style="letter-spacing: 0.05rem;">Disponíveis</p>
+                        <h3 class="display-5 fw-bold text-white mb-0">{{ disponiveis }}</h3>
+                    </div>
+                    <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 54px; height: 54px; background: rgba(16, 185, 129, 0.1); color: #10b981;">
+                        <i class="bi bi-check2-circle fs-3"></i>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-4 mb-3">
-            <div class="card text-white bg-warning">
-                <div class="card-body">
-                    <h5 class="card-title">Em Manutenção</h5>
-                    <p class="card-text fs-2">{{ em_manutencao }}</p>
+
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm" style="background: rgba(255, 255, 255, 0.03); border-radius: 1rem; border-left: 4px solid #f59e0b !important;">
+                <div class="card-body p-4 d-flex justify-content-between align-items-center">
+                    <div>
+                        <p class="text-muted text-uppercase small fw-semibold mb-1" style="letter-spacing: 0.05rem;">Em Manutenção</p>
+                        <h3 class="display-5 fw-bold text-white mb-0">{{ em_manutencao }}</h3>
+                    </div>
+                    <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 54px; height: 54px; background: rgba(245, 158, 11, 0.1); color: #f59e0b;">
+                        <i class="bi bi-tools fs-3"></i>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="row mt-4">
+    <div class="row g-4">
+
         <div class="col-md-6">
-            <h3>Equipamentos por Categoria</h3>
-            <canvas id="categoriasChart"></canvas>
+            <div class="card h-100 border-0 shadow-sm p-4" style="background: rgba(255, 255, 255, 0.02); border-radius: 1rem;">
+                <h5 class="fw-semibold text-white mb-4">Equipamentos por Categoria</h5>
+                <div style="position: relative; height: 300px; width: 100%; display: flex; justify-content: center;">
+                    <canvas id="categoriasChart"></canvas>
+                </div>
+            </div>
         </div>
+
         <div class="col-md-6">
-            <h3>Últimos Itens Adicionados</h3>
-            <ul class="list-group">
-                {% for item in ultimos_adicionados %}
-                <li class="list-group-item bg-transparent text-white">{{ item.nome }} - {{ item.codigo_patrimonio }}</li>
-                {% empty %}
-                <li class="list-group-item bg-transparent text-white">Nenhum equipamento cadastrado.</li>
-                {% endfor %}
-            </ul>
+            <div class="card h-100 border-0 shadow-sm p-4" style="background: rgba(255, 255, 255, 0.02); border-radius: 1rem;">
+                <h5 class="fw-semibold text-white mb-4">Últimos Adicionados</h5>
+
+                <div class="list-group list-group-flush">
+                    {% for item in ultimos_adicionados %}
+                    <div class="list-group-item bg-transparent px-0 border-bottom py-3 d-flex justify-content-between align-items-center" style="border-color: rgba(255,255,255,0.05) !important;">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="rounded-circle d-flex justify-content-center align-items-center" style="width: 40px; height: 40px; background: rgba(255,255,255,0.05);">
+                                <i class="bi bi-tag text-muted"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-0 text-white fw-medium">{{ item.nome }}</h6>
+                                <small class="text-muted" style="font-size: 0.8rem;">Cód: {{ item.codigo_patrimonio }}</small>
+                            </div>
+                        </div>
+                        <span class="badge rounded-pill fw-normal px-3 py-2" style="background: rgba(51, 170, 255, 0.15); color: var(--brand-light);">
+                            Novo
+                        </span>
+                    </div>
+                    {% empty %}
+                    <div class="text-center py-5 text-muted">
+                        <i class="bi bi-inbox fs-1 d-block mb-3 opacity-50"></i>
+                        Nenhum equipamento cadastrado ainda.
+                    </div>
+                    {% endfor %}
+                </div>
+
+            </div>
         </div>
     </div>
 
@@ -61,24 +108,40 @@
 
             if (chartLabels.length > 0) {
                 const myChart = new Chart(ctx, {
-                    type: 'pie',
+                    type: 'doughnut',
                     data: {
                         labels: chartLabels,
                         datasets: [{
-                            label: 'Equipamentos',
                             data: chartValues,
                             backgroundColor: chartColors,
-                            borderColor: 'rgba(20, 20, 30, 0.85)',
-                            borderWidth: 2
+                            borderWidth: 0,
+                            hoverOffset: 6
                         }]
                     },
                     options: {
                         responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '75%',
                         plugins: {
                             legend: {
+                                position: 'right',
                                 labels: {
-                                    color: 'white'
+                                    color: '#94a3b8',
+                                    usePointStyle: true,
+                                    padding: 20,
+                                    font: {
+                                        family: "'Poppins', sans-serif",
+                                        size: 13
+                                    }
                                 }
+                            },
+                            tooltip: {
+                                backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                                titleFont: { family: "'Poppins', sans-serif", size: 13 },
+                                bodyFont: { family: "'Poppins', sans-serif", size: 14 },
+                                padding: 12,
+                                cornerRadius: 8,
+                                displayColors: false
                             }
                         }
                     }

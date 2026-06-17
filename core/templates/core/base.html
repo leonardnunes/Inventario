@@ -1,105 +1,110 @@
 {% load static %}
 <!doctype html>
-<html lang="pt-br">
+<html lang="pt-br" data-bs-theme="dark">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{% block title %}Inventario{% endblock title %}</title>
+    <title>{% block title %}Inventário{% endblock title %}</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'core/css/main.css' %}?v=15">
-
-
-    <style>
-  .page-link {
-    background-color: transparent !important;
-    border-color: #495057;
-    color: #dee2e6;
-  }
-
-  .page-link:hover, .page-link:focus {
-    background-color: #33aaff;
-    background-image: linear-gradient(to right, #33aaff, #0055d4);
-    border: none;
-    color: white;
-    box-shadow: none;
-  }
-
-  .page-item.active .page-link {
-    background-color: #33aaff;
-    background-image: linear-gradient(to right, #33aaff, #0055d4);
-    border: none;
-    color: white;
-  }
-
-  .page-item.disabled .page-link {
-    background-color: #212529;
-    border-color: #495057;
-    color: #6c757d;
-  }
-
-  #login-logo {
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-    max-height: 200px !important;
-    max-width: 100%;
-    height: auto;
-  }
-
-  .form-label {
-    font-size: 1.1rem;
-  }
-</style>
+    <link rel="stylesheet" href="{% static 'core/css/main.css' %}?v=17">
 
     {% block extra_head %}{% endblock extra_head %}
 </head>
-<body>
+<body class="bg-app">
 
     {% block navbar %}
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4 py-0">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="{% url 'core:dashboard' %}">
-                <img src="{% static 'core/img/logoDashboard.png' %}" alt="Inventario Logo" style="height: 25px;">
+    <nav class="navbar navbar-expand-lg fixed-top glass-navbar py-2">
+        <div class="container-fluid px-4">
+            <a class="navbar-brand d-flex align-items-center gap-2 text-decoration-none" href="{% url 'core:dashboard' %}">
+                <div class="d-flex align-items-center justify-content-center rounded" style="background: rgba(51, 170, 255, 0.15); width: 34px; height: 34px;">
+                    <i class="bi bi-box-fill shadow-sm" style="color: var(--brand-light); font-size: 1.1rem;"></i>
+                </div>
+                <span class="fw-bold fs-5 tracking-tight" style="background: var(--brand-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -0.02rem;">
+                    Inventário
+                </span>
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
+
+            <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <i class="bi bi-list fs-1 text-white"></i>
             </button>
+
             <div class="collapse navbar-collapse" id="navbarNav">
-
-                <ul class="navbar-nav me-auto">
-
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
                     <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.view_name == 'core:lista_equipamentos' %}active{% endif %}" href="{% url 'core:lista_equipamentos' %}">Equipamentos</a>
+                        <a class="nav-link custom-nav-link {% if request.resolver_match.view_name == 'core:lista_equipamentos' %}active{% endif %}" href="{% url 'core:lista_equipamentos' %}">
+                            <i class="bi bi-box-seam me-1"></i> Equipamentos
+                        </a>
                     </li>
                 </ul>
 
-                <div class="d-flex align-items-center mt-3 mt-lg-0">
+                <div class="d-flex align-items-center mt-3 mt-lg-0 gap-3">
                     {% if user.is_authenticated %}
-                        <span class="navbar-text text-white me-2">Olá, <strong>{{ user.username }}</strong>!</span>
+                        <div class="user-badge">
+                            <i class="bi bi-person-circle"></i>
+                            <span>{{ user.username }}</span>
+                        </div>
+
                         {% if user.is_superuser %}
-                            <a href="{% url 'admin:index' %}" class="btn btn-warning btn-sm me-2">Admin</a>
+                            <a href="{% url 'admin:index' %}" class="btn btn-sm btn-outline-warning rounded-pill px-3">
+                                <i class="bi bi-shield-lock me-1"></i> Admin
+                            </a>
                         {% endif %}
-                        <form action="{% url 'logout' %}" method="post" class="d-inline">
+
+                        <form action="{% url 'logout' %}" method="post" class="m-0">
                             {% csrf_token %}
-                            <button type="submit" class="btn btn-secondary btn-sm">Sair</button>
+                            <button type="submit" class="btn btn-sm btn-danger rounded-pill px-3 custom-logout-btn">
+                                <i class="bi bi-box-arrow-right"></i> Sair
+                            </button>
                         </form>
                     {% else %}
-                        <a href="{% url 'login' %}" class="btn btn-primary btn-sm">Entrar</a>
+                        <a href="{% url 'login' %}" class="btn btn-primary rounded-pill px-4 shadow-sm">Entrar</a>
                     {% endif %}
                 </div>
-
             </div>
         </div>
     </nav>
     {% endblock navbar %}
 
-    <div class="container">
-        <div class="content-container">
+    {% if messages %}
+    <div class="position-fixed start-50 translate-middle-x" style="top: 85px; z-index: 1050; width: 90%; max-width: 500px;">
+        {% for message in messages %}
+            {% if message.tags == 'success' %}
+                <div class="alert alert-dismissible fade show shadow-lg d-flex align-items-center" role="alert" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); backdrop-filter: blur(10px); color: #a7f3d0; border-radius: 1rem;">
+                    <i class="bi bi-check-circle-fill fs-4 me-3" style="color: #10b981;"></i>
+            {% elif message.tags == 'warning' %}
+                <div class="alert alert-dismissible fade show shadow-lg d-flex align-items-center" role="alert" style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); backdrop-filter: blur(10px); color: #fde68a; border-radius: 1rem;">
+                    <i class="bi bi-exclamation-triangle-fill fs-4 me-3" style="color: #f59e0b;"></i>
+            {% elif message.tags == 'error' or message.tags == 'danger' %}
+                <div class="alert alert-dismissible fade show shadow-lg d-flex align-items-center" role="alert" style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); backdrop-filter: blur(10px); color: #fecaca; border-radius: 1rem;">
+                    <i class="bi bi-x-octagon-fill fs-4 me-3" style="color: #ef4444;"></i>
+            {% else %}
+                <div class="alert alert-dismissible fade show shadow-lg d-flex align-items-center" role="alert" style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); backdrop-filter: blur(10px); color: #bfdbfe; border-radius: 1rem;">
+                    <i class="bi bi-info-circle-fill fs-4 me-3" style="color: #3b82f6;"></i>
+            {% endif %}
+
+                <div class="flex-grow-1 small fw-medium" style="letter-spacing: 0.02rem;">
+                    {{ message }}
+                </div>
+
+                <button type="button" class="btn-close btn-close-white ms-2" data-bs-dismiss="alert" aria-label="Close" style="opacity: 0.5; font-size: 0.8rem;"></button>
+            </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="container main-wrapper">
+        <div class="institutional-header text-center fade-in">
+            <span class="institutional-prefix text-muted">Inventário</span>
+            <h1 class="institutional-title">1ª Igreja em Nilópolis</h1>
+        </div>
+
+        <div class="content-glass-card shadow-lg fade-in">
             {% block content %}
             {% endblock content %}
         </div>
@@ -107,6 +112,19 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                let alerts = document.querySelectorAll('.alert');
+                alerts.forEach(function(alert) {
+                    let bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                });
+            }, 5000);
+        });
+    </script>
+
     {% block scripts %}{% endblock scripts %}
 
 </body>

@@ -1,56 +1,45 @@
-{% extends "core/base.html" %} {% load static %} {% block content %}
-<div class="container mt-4">
-    <h2>Importar Equipamentos via CSV</h2>
-    <p>
-        Use esta página para criar ou atualizar equipamentos em massa a partir de um arquivo CSV.
-        O sistema usará o <strong>Número de Série</strong> para identificar equipamentos existentes.
-    </p>
+{% extends 'core/base.html' %}
+{% load static %}
 
-    {% if messages %}
-        {% for message in messages %}
-            <div class="alert
-                {% if message.tags == 'success' %}alert-success{% endif %}
-                {% if message.tags == 'info' %}alert-info{% endif %}
-                {% if message.tags == 'warning' %}alert-warning{% endif %}
-                {% if message.tags == 'error' %}alert-danger{% endif %}"
-                 role="alert">
-                {{ message }}
-            </div>
-        {% endfor %}
-    {% endif %}
+{% block title %}Importar Equipamentos - Inventário{% endblock %}
 
-    <div class="card">
-        <div class="card-body">
-            <h5 class="card-title">Instruções de Importação</h5>
-            <p>
-                O arquivo deve ser um <strong>.csv</strong> codificado em <strong>UTF-8</strong> (gerado pela função "Exportar CSV" do sistema).
-            </p>
-            <p>
-                O delimitador de colunas deve ser um ponto-e-vírgula (<strong>;</strong>).
-            </p>
-            <p>
-                A ordem das 14 colunas <strong>DEVE</strong> ser exatamente esta:
-            </p>
-            <pre style="font-size: 0.85em; background-color: #f4f4f4; padding: 10px; border-radius: 5px;"><code>ID;Código de Patrimônio;Nome;Marca;Modelo;Número de Série;Categoria;Localização;Departamento;Situação;Data de Entrada;Data de Saída;Preço Aproximado;Observações</code></pre>
-            <ul>
-                <li><strong>ID</strong> e <strong>Código de Patrimônio</strong>: Serão ignorados. Novos códigos serão gerados automaticamente.</li>
-                <li><strong>Datas:</strong> Devem estar no formato DD/MM/AAAA (ex: 27/10/2025).</li>
-                <li><strong>Situação:</strong> Deve ser o texto exato (ex: "Em Uso", "Disponível").</li>
-            </ul>
-
-            <hr>
-
-            <form method="post" enctype="multipart/form-data">
-                {% csrf_token %}
-                <div class="mb-3">
-                    <label for="csv_file" class="form-label">Selecione o arquivo .csv:</label>
-                    <input type="file" class="form-control" id="csv_file" name="csv_file" accept=".csv" required>
-                </div>
-                <button type="submit" class="btn btn-primary">
-                    <i class="bi bi-upload"></i> Importar Arquivo
-                </button>
-            </form>
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex align-items-center mb-4">
+        <a href="{% url 'core:lista_equipamentos' %}" class="btn btn-outline-secondary btn-sm me-3"><i class="bi bi-arrow-left"></i></a>
+        <div>
+            <h2 class="fw-bold text-white mb-1">Importar via CSV</h2>
+            <p class="text-muted mb-0">Suba seu acervo em massa com segurança</p>
         </div>
+    </div>
+
+    <div class="card border-0 shadow-lg p-4" style="background: rgba(255,255,255,0.02); border-radius: 1.5rem; border: 1px solid rgba(255,255,255,0.05);">
+
+        <h5 class="text-white mb-4"><i class="bi bi-info-circle me-2 text-info"></i>Instruções de Importação</h5>
+
+        <ul class="text-muted small mb-4 ps-3">
+            <li class="mb-2">O arquivo deve ser um <strong>.csv</strong> codificado em <strong>UTF-8</strong>.</li>
+            <li class="mb-2">O delimitador de colunas deve ser um ponto-e-vírgula (<strong>;</strong>).</li>
+            <li class="mb-2"><strong>Formato de Datas:</strong> DD/MM/AAAA (ex: 22/10/2026).</li>
+            <li><strong>Situação:</strong> Deve ser o texto exato (ex: "Em Uso", "Disponível").</li>
+        </ul>
+
+        <div class="mb-4 p-3 rounded" style="background: #0f172a; border: 1px solid #334155; font-family: 'Courier New', Courier, monospace;">
+            <p class="text-info small mb-1 opacity-75">Ordem esperada das colunas:</p>
+            <code class="text-light" style="word-break: break-all;">ID;Código de Patrimônio;Nome;Marca;Modelo;Número de Série;Categoria;Localização;Departamento;Situação;Data de Entrada;Data de Saída;Preço;Observações</code>
+        </div>
+
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="mb-4">
+                <label class="form-label text-white fw-medium">Selecione o arquivo .csv:</label>
+                <input type="file" name="csv_file" class="form-control form-control-lg border-0 shadow-none" style="background: rgba(255,255,255,0.05); color: white;" accept=".csv" required>
+            </div>
+
+            <button type="submit" class="btn btn-Inventario-gradient btn-lg px-5 shadow-sm">
+                <i class="bi bi-cloud-upload me-2"></i> Importar Agora
+            </button>
+        </form>
     </div>
 </div>
 {% endblock %}

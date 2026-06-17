@@ -1,167 +1,201 @@
+:root {
+    --brand-light: #4f46e5;
+    --brand-dark: #1e3a8a;
+    --brand-gradient: linear-gradient(135deg, var(--brand-light), var(--brand-dark));
+    --brand-gradient-hover: linear-gradient(135deg, #6366f1, #1e40af);
+    --bg-glass: rgba(25, 27, 32, 0.65);
+    --border-glass: rgba(255, 255, 255, 0.08);
+    --text-primary: #f8f9fa;
+    --text-muted: #94a3b8;
+}
+
+
 body {
-    background-image: url('../img/Background.png');
+    background-image: url('../img/logoSistemaInventario.png');
     background-size: cover;
     background-position: center center;
     background-repeat: no-repeat;
     background-attachment: fixed;
-    color: #f8f9fa;
+    background-color: #0f172a;
+    color: var(--text-primary);
+    font-family: 'Poppins', sans-serif;
+    padding-top: 100px;
+    padding-bottom: 40px;
+    min-height: 100vh;
 }
 
-.content-container {
-    background-color: rgba(25, 27, 32, 0.85);
-    padding: 2rem;
-    border-radius: 0.5rem;
-    border: 1px solid #444;
-    max-width: 900px;
-    margin: 2rem auto;
+
+.content-container, .content-glass-card {
+    background-color: var(--bg-glass);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+
+    padding: 2.5rem;
+    border-radius: 1rem;
+    border: 1px solid var(--border-glass);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+    max-width: 1000px;
+    margin: 0 auto;
+    transition: all 0.3s ease;
 }
 
-.table {
-    --bs-table-color: #f8f9fa;
-    --bs-table-bg: transparent;
-    --bs-table-border-color: #444;
-    --bs-table-striped-color: #f8f9fa;
-    --bs-table-hover-color: #f8f9fa;
-    --bs-table-hover-bg: rgba(255, 255, 255, 0.1);
+.glass-navbar {
+    background-color: rgba(15, 23, 42, 0.6) !important;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border-glass);
 }
 
-body .form-control,
-body .form-select {
-    background-color: #343a40;
-    color: white;
-    border-color: #6c757d;
-}
-
-body .form-control:focus {
-    background-color: #343a40;
-    color: white;
-    border-color: #0d6efd;
-    box-shadow: none;
-}
-
-body .form-control::placeholder,
-body .form-control::-webkit-input-placeholder,
-body .form-control::-moz-placeholder,
-body .form-control:-ms-input-placeholder {
-    color: #aaa !important;
-    opacity: 1;
-}
-
-.search-form {
-    max-width: 600px;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-.search-bar-custom .form-control {
-    border-right: none;
-}
-
-.search-bar-custom .btn {
-    border-color: #6c757d;
-    color: #a9d7ef;
-}
-
-.search-bar-custom .btn:hover {
-    color: #ffffff;
-}
-
-.search-bar-custom .form-control:focus + .btn {
-    border-color: #0d6efd;
-    box-shadow: none;
-}
-
-.content-container a {
-    color: #a9d7ef;
-    text-decoration: none;
-    font-weight: bold;
-    transition: color 0.2s ease-in-out;
-}
-
-.content-container a:hover {
-    color: #ffffff;
-    text-decoration: underline;
-}
 
 .btn-Inventario-gradient {
-    background: linear-gradient(to right, #33aaff, #0055d4);
-    border-color: #0055d4;
+    background: var(--brand-gradient);
+    border: none;
     color: #ffffff;
-    font-weight: bold;
-    transition: all 0.2s ease-in-out;
+    font-weight: 600;
+    transition: all 0.3s ease-in-out;
+    border-radius: 0.5rem;
+    padding: 0.5rem 1.5rem;
 }
 
 .btn-Inventario-gradient:hover {
-    background: linear-gradient(to right, #0055d4, #33aaff);
-    border-color: #33aaff;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-.btn-Inventario-gradient:active,
-.btn-Inventario-gradient:focus {
-    background: linear-gradient(to right, #33aaff, #0055d4) !important;
-    border-color: #0055d4 !important;
-    box-shadow: 0 0 0 0.25rem rgba(0, 85, 212, 0.5) !important;
-    transform: none;
+    background: var(--brand-gradient-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(79, 70, 229, 0.35);
+    color: white;
 }
 
 .btn-outline-Inventario {
-    border-color: #33aaff;
-    color: #a9d7ef;
+    border: 1px solid rgba(79, 70, 229, 0.4);
+    color: var(--text-muted);
     background-color: transparent;
-    font-weight: bold;
+    font-weight: 500;
     transition: all 0.3s ease;
+    border-radius: 0.5rem;
 }
 
 .btn-outline-Inventario:hover {
-    background: linear-gradient(to right, #33aaff, #0055d4);
+    background: rgba(79, 70, 229, 0.15);
     color: #ffffff;
-    border-color: #33aaff;
+    border-color: var(--brand-light);
     transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    box-shadow: none;
 }
 
 .nav-link {
-    display: inline-block;
-    padding: 0rem;
-    border-radius: 0.25rem;
-    text-decoration: none;
-    color: #f8f9fa;
-    background: transparent;
-    transition: all 0.3s ease;
     font-family: 'Poppins', sans-serif;
     font-weight: 500;
+    color: var(--text-primary) !important;
+    transition: all 0.3s ease;
+    padding: 0.5rem 1rem !important;
 }
 
-.nav-link:not(.active):hover {
-    background: linear-gradient(to right, #ADD8E6, #007bff);
+.nav-link:hover, .nav-link.active, .navbar-brand.active {
+    background: var(--brand-gradient);
     -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
     background-clip: text;
-    color: transparent;
+    transform: translateY(-1px);
+    font-weight: 700;
+}
+
+
+body .form-control,
+body .form-select {
+    background-color: rgba(255, 255, 255, 0.05);
+    color: white;
+    border: 1px solid var(--border-glass);
+    border-radius: 0.5rem;
+    padding: 0.75rem 1rem;
+    transition: all 0.3s ease;
+}
+
+body .form-control:focus,
+body .form-select:focus {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
+    border-color: var(--brand-light);
+    box-shadow: 0 0 0 0.25rem rgba(51, 170, 255, 0.25);
+}
+
+body .form-control::placeholder {
+    color: rgba(255, 255, 255, 0.4) !important;
+}
+
+
+.table {
+    --bs-table-color: var(--text-primary);
+    --bs-table-bg: transparent;
+    --bs-table-border-color: rgba(255, 255, 255, 0.08);
+    --bs-table-hover-bg: rgba(255, 255, 255, 0.06);
+    --bs-table-hover-color: #ffffff;
+    --bs-table-striped-bg: rgba(255, 255, 255, 0.02);
+    --bs-table-striped-color: var(--text-primary);
+
+    margin-top: 1rem;
+}
+
+.table td, .table th {
+    background-color: transparent !important;
+}
+
+.page-link {
+    background-color: transparent !important;
+    border-color: rgba(255, 255, 255, 0.1);
+    color: var(--text-muted);
+    transition: all 0.2s;
+}
+
+.page-link:hover {
+    background: var(--brand-gradient);
+    border-color: transparent;
+    color: white;
+}
+
+.page-item.active .page-link {
+    background: var(--brand-gradient);
+    border-color: transparent;
+    color: white;
+    box-shadow: 0 4px 12px rgba(0, 85, 212, 0.4);
+}
+
+
+@media (max-width: 768px) {
+    .content-container, .content-glass-card {
+        max-width: 95%;
+        margin: 1rem auto;
+        padding: 1.5rem;
+    }
+}
+
+.btn-glass {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border-radius: 0.5rem;
+}
+
+.btn-glass:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.25);
+    color: #ffffff;
     transform: translateY(-1px);
 }
 
-.nav-link.active {
-    font-weight: bold;
-    background: linear-gradient(to right, #ADD8E6, #007bff);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+.table thead th {
+    color: #ffffff !important;
+    font-size: 0.7rem !important;
+    font-weight: 700 !important;
+    text-transform: uppercase;
+    letter-spacing: 0.1rem !important;
+    padding: 1.2rem 1rem !important;
+    background: rgba(15, 23, 42, 0.4) !important;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+    position: sticky;
+    top: 0;
+    z-index: 10;
 }
-
-.navbar-brand.active {
-    font-weight: bold;
-    background: linear-gradient(to right, #ADD8E6, #007bff);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-}
-
-@media (max-width: 768px) {
-    .content-container {
-        max-width: 95%;
-        margin: 1rem auto;
-        padding: 1rem;
-    }
 }
