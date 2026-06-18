@@ -35,7 +35,6 @@ class DashboardView(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        # 1. Totalizadores Rápidos
         context['total_equipamentos'] = Equipamento.objects.count()
         context['em_manutencao'] = Equipamento.objects.filter(situacao='manutencao').count()
         context['disponiveis'] = Equipamento.objects.filter(situacao='disponivel').count()
@@ -51,9 +50,20 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         chart_values = [item['total'] for item in chart_data_queryset]
 
         base_colors = [
-            'rgba(255, 99, 132, 0.8)', 'rgba(54, 162, 235, 0.8)', 'rgba(255, 206, 86, 0.8)',
-            'rgba(75, 192, 192, 0.8)', 'rgba(153, 102, 255, 0.8)', 'rgba(255, 159, 64, 0.8)'
+            'rgba(56, 189, 248, 0.8)',
+            'rgba(16, 185, 129, 0.8)',
+            'rgba(167, 139, 250, 0.8)',
+            'rgba(245, 158, 11, 0.8)',
+            'rgba(244, 63, 94, 0.8)',
+            'rgba(14, 165, 233, 0.8)',
+            'rgba(34, 197, 94, 0.8)',
+            'rgba(139, 92, 246, 0.8)',
+            'rgba(249, 115, 22, 0.8)',
+            'rgba(236, 72, 153, 0.8)',
+            'rgba(6, 182, 212, 0.8)',
+            'rgba(234, 179, 8, 0.8)'
         ]
+
         chart_colors = [base_colors[i % len(base_colors)] for i in range(len(chart_labels))]
 
         context['chart_labels'] = json.dumps(chart_labels)

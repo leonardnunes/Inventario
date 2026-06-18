@@ -1,5 +1,6 @@
 {% extends 'core/base.html' %}
 {% load static %}
+{% load humanize %}
 
 {% block title %}{{ equipamento.nome }} - Detalhes - Inventário{% endblock %}
 
@@ -131,7 +132,7 @@
                         </h6>
                         <div class="p-3 rounded-3" style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05);">
                             <label class="text-muted small d-block fw-semibold" style="font-size: 0.75rem;">Preço Aproximado</label>
-                            <span class="text-white fw-bold fs-5">R$ {{ equipamento.preco_aproximado|default:"0,00" }}</span>
+                            <span class="text-white fw-bold fs-5">R$ {{ equipamento.preco_aproximado|floatformat:2|intcomma|default:"0,00" }}</span>
                         </div>
                     </div>
                 </div>
