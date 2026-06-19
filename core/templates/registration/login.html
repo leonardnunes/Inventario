@@ -1,6 +1,47 @@
 {% extends "core/base.html" %}
 {% load static %}
 
+{% block extra_head %}
+<style>
+    .login-input-group {
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 0.375rem;
+        background: rgba(255, 255, 255, 0.05);
+        transition: all 0.2s ease-in-out;
+    }
+
+    .login-input-group:focus-within {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 0.25rem rgba(59, 130, 246, 0.25);
+        background: rgba(255, 255, 255, 0.08);
+    }
+
+    .login-input-group .form-control,
+    .login-input-group .input-group-text,
+    .login-input-group .btn {
+        background: transparent !important;
+        border: none !important;
+        color: #f8fafc;
+    }
+
+    .login-input-group .form-control:focus {
+        box-shadow: none !important;
+    }
+
+    .login-input-group .form-control::placeholder {
+        color: rgba(255, 255, 255, 0.3);
+    }
+
+    input:-webkit-autofill,
+    input:-webkit-autofill:hover,
+    input:-webkit-autofill:focus,
+    input:-webkit-autofill:active {
+        transition: background-color 5000s ease-in-out 0s !important;
+        -webkit-text-fill-color: #f8fafc !important;
+    }
+</style>
+{% endblock extra_head %}
+
 {% block navbar %}{% endblock navbar %}
 
 {% block title %}Login - Inventário{% endblock %}
@@ -25,21 +66,24 @@
 
             <div class="mb-4">
                 <label for="id_username" class="form-label text-muted small fw-medium text-uppercase" style="letter-spacing: 0.05rem;">Usuário</label>
-                <div class="input-group">
-                    <span class="input-group-text border-0" style="background: rgba(255,255,255,0.05); color: var(--text-muted);">
+                <div class="input-group login-input-group">
+                    <span class="input-group-text" style="color: var(--text-muted);">
                         <i class="bi bi-person"></i>
                     </span>
-                    <input type="text" name="username" id="id_username" class="form-control border-0" style="background: rgba(255,255,255,0.05);" required>
+                    <input type="text" name="username" id="id_username" class="form-control" required autocomplete="username">
                 </div>
             </div>
 
             <div class="mb-4">
                 <label for="id_password" class="form-label text-muted small fw-medium text-uppercase" style="letter-spacing: 0.05rem;">Senha</label>
-                <div class="input-group">
-                    <span class="input-group-text border-0" style="background: rgba(255,255,255,0.05); color: var(--text-muted);">
+                <div class="input-group login-input-group">
+                    <span class="input-group-text" style="color: var(--text-muted);">
                         <i class="bi bi-lock"></i>
                     </span>
-                    <input type="password" name="password" id="id_password" class="form-control border-0" style="background: rgba(255,255,255,0.05);" required>
+                    <input type="password" name="password" id="id_password" class="form-control" required autocomplete="current-password">
+                    <button class="btn" type="button" id="togglePassword" style="color: var(--text-muted);">
+                        <i class="bi bi-eye"></i>
+                    </button>
                 </div>
             </div>
 
@@ -57,3 +101,20 @@
     </div>
 </div>
 {% endblock content %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const togglePassword = document.querySelector('#togglePassword');
+        const passwordInput = document.querySelector('#id_password');
+        const icon = togglePassword.querySelector('i');
+
+        togglePassword.addEventListener('click', function () {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            icon.classList.toggle('bi-eye');
+            icon.classList.toggle('bi-eye-slash');
+        });
+    });
+</script>
+{% endblock scripts %}

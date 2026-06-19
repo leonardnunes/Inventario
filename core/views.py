@@ -375,7 +375,7 @@ def imprimir_etiquetas_massa(request):
 
     equipamentos_qs = equipamentos_qs.order_by('codigo_patrimonio')
 
-    LIMITE_MAXIMO = 100
+    LIMITE_MAXIMO = 500
     total_solicitado = equipamentos_qs.count()
 
     if total_solicitado > LIMITE_MAXIMO:
@@ -419,6 +419,18 @@ class RelatorioInventarioView(PermissionRequiredMixin, ListView):
     template_name = 'core/relatorio_inventario.html'
     context_object_name = 'equipamentos'
 
+    def get(self, request, *args, **kwargs):
+        quantidade_itens = self.get_queryset().count()
+        limite_seguro = 1000
+        if quantidade_itens > limite_seguro:
+            messages.warning(
+                request,
+                f"Relatório muito extenso ({quantidade_itens} itens). O limite para PDF é de {limite_seguro} itens para evitar travamentos. Por favor, refine a sua busca filtrando por Departamento ou Categoria."
+            )
+            return redirect('core:lista_equipamentos')
+
+        return super().get(request, *args, **kwargs)
+
     def get_queryset(self):
         queryset = super().get_queryset().select_related('departamento', 'categoria', 'localizacao')
         query = self.request.GET.get('q', '')
@@ -452,6 +464,7 @@ class RelatorioInventarioView(PermissionRequiredMixin, ListView):
 
         context['data_geracao'] = timezone.now()
         context['total_itens'] = queryset.count()
+
         soma_patrimonio = queryset.aggregate(total=Sum('preco_aproximado'))['total']
         context['valor_total'] = soma_patrimonio if soma_patrimonio else 0
 

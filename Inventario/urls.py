@@ -5,7 +5,9 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('gestao-naza/', admin.site.urls),
+
     path('accounts/', include('django.contrib.auth.urls')),
+
     path('', include('core.urls', namespace='core')),
 ]
 
