@@ -11,6 +11,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.db import transaction
+from django.http import HttpResponseRedirect
 from django.db.models import Q, Count, Sum
 from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
@@ -40,7 +41,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         context['disponiveis'] = Equipamento.objects.filter(situacao='disponivel').count()
         context['ultimos_adicionados'] = Equipamento.objects.order_by('-id')[:5]
         context['valor_total'] = Equipamento.objects.aggregate(total=Sum('preco_aproximado'))['total'] or 0
-        context['ultimas_movimentacoes'] = HistoricoEquipamento.objects.all()[:8]
+        context['ultimas_movimentacoes'] = HistoricoEquipamento.objects.select_related('equipamento', 'usuario')[:8]
 
         chart_data_queryset = Equipamento.objects.values('categoria__nome').annotate(total=Count('id')).order_by(
             'categoria__nome')
@@ -71,6 +72,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         context['chart_colors'] = json.dumps(chart_colors)
 
         return context
+
 
 class EquipamentoListView(PermissionRequiredMixin, ListView):
     permission_required = 'core.view_equipamento'
@@ -129,6 +131,7 @@ class EquipamentoListView(PermissionRequiredMixin, ListView):
         context['departamentos'] = Departamento.objects.all().order_by('nome')
         context['departamento_selecionado_id'] = departamento_id
         context['query_atual'] = query
+        context['categorias'] = Categoria.objects.all().order_by('nome')
 
         return context
 
@@ -140,12 +143,19 @@ class EquipamentoDetailView(PermissionRequiredMixin, DetailView):
     context_object_name = 'equipamento'
 
 
+
 class EquipamentoCreateView(PermissionRequiredMixin, CreateView):
     permission_required = 'core.add_equipamento'
     model = Equipamento
     form_class = EquipamentoForm
     template_name = 'core/equipamento_form.html'
     success_url = reverse_lazy('core:lista_equipamentos')
+
+    def form_valid(self, form):
+        self.object = form.save(commit=False)
+        self.object.save(user=self.request.user)
+
+        return HttpResponseRedirect(self.get_success_url())
 
 
 class EquipamentoUpdateView(PermissionRequiredMixin, UpdateView):
@@ -156,6 +166,12 @@ class EquipamentoUpdateView(PermissionRequiredMixin, UpdateView):
 
     def get_success_url(self):
         return reverse('core:equipamento_detalhe', kwargs={'pk': self.object.pk})
+
+    def form_valid(self, form):
+        self.object = form.save(commit=False)
+        self.object.save(user=self.request.user)
+
+        return HttpResponseRedirect(self.get_success_url())
 
 
 class EquipamentoDeleteView(PermissionRequiredMixin, DeleteView):
@@ -397,7 +413,6 @@ equipamento_editar = EquipamentoUpdateView.as_view()
 equipamento_excluir = EquipamentoDeleteView.as_view()
 
 
-
 class RelatorioInventarioView(PermissionRequiredMixin, ListView):
     permission_required = 'core.view_equipamento'
     model = Equipamento
@@ -409,6 +424,7 @@ class RelatorioInventarioView(PermissionRequiredMixin, ListView):
         query = self.request.GET.get('q', '')
         departamento_id = self.request.GET.get('departamento', '')
         status_param = self.request.GET.get('status', '')
+        categoria_id = self.request.GET.get('categoria', '')
 
         if query:
             queryset = queryset.filter(
@@ -425,12 +441,19 @@ class RelatorioInventarioView(PermissionRequiredMixin, ListView):
         if status_param:
             queryset = queryset.filter(situacao=status_param)
 
+        if categoria_id:
+            queryset = queryset.filter(categoria__id=categoria_id)
+
         return queryset.order_by('nome')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        queryset = self.get_queryset()
+
         context['data_geracao'] = timezone.now()
-        context['total_itens'] = self.get_queryset().count()
+        context['total_itens'] = queryset.count()
+        soma_patrimonio = queryset.aggregate(total=Sum('preco_aproximado'))['total']
+        context['valor_total'] = soma_patrimonio if soma_patrimonio else 0
 
         return context
 

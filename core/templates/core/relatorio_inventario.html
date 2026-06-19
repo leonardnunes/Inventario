@@ -1,3 +1,4 @@
+{% load humanize %}
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -13,14 +14,20 @@
         th { background-color: #f8f9fa; color: #2c3e50; font-weight: bold; text-align: left; padding: 10px; border-bottom: 2px solid #ddd; text-transform: uppercase; font-size: 11px; }
         td { padding: 10px; border-bottom: 1px solid #eee; vertical-align: middle; }
 
+        .text-right { text-align: right; }
+
         .badge { padding: 3px 8px; border-radius: 12px; font-size: 10px; font-weight: bold; text-transform: uppercase; }
         .badge-disponivel { background-color: #d1fae5; color: #065f46; }
         .badge-em-uso { background-color: #dbeafe; color: #1e40af; }
         .badge-manutencao { background-color: #fef3c7; color: #92400e; }
         .badge-descartado { background-color: #fee2e2; color: #991b1b; }
 
+        /* Nova classe para o rodapé financeiro */
+        .resumo-financeiro { margin-top: 25px; padding: 15px; background-color: #f8f9fa; border: 1px solid #ddd; border-radius: 4px; text-align: right; font-size: 12px; color: #2c3e50; page-break-inside: avoid; }
+        .valor-total { font-size: 16px; font-weight: bold; color: #065f46; }
+
         .rodape { margin-top: 40px; border-top: 1px solid #ddd; padding-top: 10px; text-align: center; font-size: 10px; color: #95a5a6; }
-        .assinatura { width: 250px; border-top: 1px solid #333; margin: 50px auto 0; text-align: center; padding-top: 5px; }
+        .assinatura { width: 250px; border-top: 1px solid #333; margin: 40px auto 0; text-align: center; padding-top: 5px; page-break-inside: avoid; }
 
         @media print {
             body { padding: 0; }
@@ -28,11 +35,13 @@
         }
     </style>
 </head>
-<body onload="window.print()"> <div class="cabecalho">
+<body onload="window.print()">
+    <div class="cabecalho">
         <h1 class="titulo">Relatório de Inventário Físico</h1>
         <div class="info-meta">
             Gerado em: {{ data_geracao|date:"d/m/Y H:i" }} | Total de Itens: {{ total_itens }}
             {% if request.GET.departamento %} | Filtro: Departamento{% endif %}
+            {% if request.GET.categoria %} | Filtro: Categoria{% endif %}
             {% if request.GET.status %} | Filtro: Status ({{ request.GET.status|title }}){% endif %}
         </div>
     </div>
@@ -40,11 +49,12 @@
     <table>
         <thead>
             <tr>
-                <th width="15%">Patrimônio</th>
-                <th width="30%">Equipamento</th>
-                <th width="20%">Marca / Modelo</th>
-                <th width="20%">Localização</th>
+                <th width="12%">Patrimônio</th>
+                <th width="25%">Equipamento</th>
+                <th width="18%">Marca / Modelo</th>
+                <th width="15%">Localização</th>
                 <th width="15%">Situação</th>
+                <th width="15%" class="text-right">Valor Estimado</th>
             </tr>
         </thead>
         <tbody>
@@ -61,14 +71,25 @@
                     {% else %}<span class="badge badge-descartado">Descartado</span>
                     {% endif %}
                 </td>
+                <td class="text-right">
+                    R$ {{ item.preco_aproximado|default_if_none:"0"|floatformat:2|intcomma }}
+                </td>
             </tr>
             {% empty %}
             <tr>
-                <td colspan="5" style="text-align: center; color: #7f8c8d;">Nenhum equipamento encontrado com estes filtros.</td>
+                <td colspan="6" style="text-align: center; color: #7f8c8d;">Nenhum equipamento encontrado com estes filtros.</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
+
+    <div class="resumo-financeiro">
+        <strong>Resumo da Auditoria</strong><br>
+        <span style="display: inline-block; margin-top: 5px;">
+            Total de Itens Listados: <strong>{{ total_itens }}</strong> <br>
+            Valor Total do Patrimônio Listado: <span class="valor-total">R$ {{ valor_total|default_if_none:"0"|floatformat:2|intcomma }}</span>
+        </span>
+    </div>
 
     <div class="assinatura">
         Assinatura do Responsável

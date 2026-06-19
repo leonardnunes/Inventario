@@ -178,6 +178,9 @@
 
                     <div class="text-muted small mb-1" style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05rem;">
                         <i class="bi bi-calendar3 me-1"></i>{{ log.data_registro|date:"d M Y - H:i" }}
+                        <span class="mx-2 text-secondary opacity-50">|</span>
+                        <i class="bi bi-person-fill me-1"></i>
+                        <span class="text-light fw-medium text-capitalize" style="text-transform: none;">{{ log.usuario.username|default:"Sistema" }}</span>
                     </div>
                     <div class="text-light" style="font-size: 0.85rem;">
                         {{ log.observacao }}

@@ -1,6 +1,7 @@
 from django.db import models
 from django.urls import reverse
 from django.utils import timezone
+from django.conf import settings
 
 
 class Categoria(models.Model):
@@ -75,6 +76,8 @@ class Equipamento(models.Model):
         return f"{self.nome} (Série: {self.numero_serie if self.numero_serie else 'N/A'})"
 
     def save(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+
         is_new = self.pk is None
         old_obj = None
 
@@ -93,13 +96,15 @@ class Equipamento(models.Model):
         if is_new:
             HistoricoEquipamento.objects.create(
                 equipamento=self,
-                observacao="Equipamento cadastrado e patrimônio gerado."
+                observacao="Equipamento cadastrado e patrimônio gerado.",
+                usuario=user
             )
         elif old_obj:
             if old_obj.situacao != self.situacao:
                 HistoricoEquipamento.objects.create(
                     equipamento=self,
-                    observacao=f"Situação alterada de '{old_obj.get_situacao_display()}' para '{self.get_situacao_display()}'."
+                    observacao=f"Situação alterada de '{old_obj.get_situacao_display()}' para '{self.get_situacao_display()}'.",
+                    usuario=user
                 )
 
             if old_obj.departamento != self.departamento:
@@ -107,16 +112,20 @@ class Equipamento(models.Model):
                 depto_novo = self.departamento.nome if self.departamento else "Nenhum"
                 HistoricoEquipamento.objects.create(
                     equipamento=self,
-                    observacao=f"Transferido do departamento '{depto_antigo}' para '{depto_novo}'."
+                    observacao=f"Transferido do departamento '{depto_antigo}' para '{depto_novo}'.",
+                    usuario=user
                 )
 
     def get_absolute_url(self):
         return reverse('core:equipamento_detalhe', kwargs={'pk': self.pk})
 
+
 class HistoricoEquipamento(models.Model):
     equipamento = models.ForeignKey('Equipamento', on_delete=models.CASCADE, related_name='historicos')
     observacao = models.CharField(max_length=255)
     data_registro = models.DateTimeField(auto_now_add=True)
+    usuario = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
+                                verbose_name="Usuário")
 
     class Meta:
         ordering = ['-data_registro']
@@ -124,19 +133,5 @@ class HistoricoEquipamento(models.Model):
         verbose_name_plural = 'Históricos'
 
     def __str__(self):
-        return f"{self.data_registro.strftime('%d/%m/%Y %H:%M')} - {self.observacao}"
-
-
-
-class HistoricoEquipamento(models.Model):
-    equipamento = models.ForeignKey('Equipamento', on_delete=models.CASCADE, related_name='historicos')
-    observacao = models.CharField(max_length=255)
-    data_registro = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        ordering = ['-data_registro']
-        verbose_name = 'Histórico'
-        verbose_name_plural = 'Históricos'
-
-    def __str__(self):
-        return f"{self.data_registro.strftime('%d/%m/%Y %H:%M')} - {self.observacao}"
+        nome_usuario = self.usuario.username if self.usuario else "Sistema"
+        return f"{self.data_registro.strftime('%d/%m/%Y %H:%M')} - {self.observacao} ({nome_usuario})"

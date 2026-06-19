@@ -107,6 +107,7 @@
 
             <div class="vr mx-1" style="color: rgba(255,255,255,0.2);"></div>
 
+            <div class="btn-group">
             <a href="{% url 'core:gerar_relatorio' %}?q={{ request.GET.q|default:'' }}&departamento={{ request.GET.departamento|default:'' }}&status={{ request.GET.status|default:'' }}"
                id="btn-gerar-relatorio"
                class="btn btn-sm btn-outline-info px-3"
@@ -114,6 +115,45 @@
                title="Gera relatório em PDF para auditoria">
                 <i class="bi bi-file-earmark-pdf me-1"></i> Gerar Relatório
             </a>
+
+            <button type="button" class="btn btn-sm btn-outline-info dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+                <span class="visually-hidden">Filtrar Relatório</span>
+            </button>
+
+            <ul class="dropdown-menu dropdown-menu-dark shadow" style="max-height: 400px; overflow-y: auto;">
+                <li>
+                    <a class="dropdown-item fw-bold text-info" href="{% url 'core:gerar_relatorio' %}?q={{ request.GET.q|default:'' }}&status={{ request.GET.status|default:'' }}" target="_blank">
+                        <i class="bi bi-printer me-2"></i> Relatório Completo
+                    </a>
+                </li>
+
+                <li><hr class="dropdown-divider"></li>
+
+                <li><h6 class="dropdown-header text-uppercase text-light">Por Departamento</h6></li>
+                {% for depto in departamentos %}
+                    <li>
+                        <a class="dropdown-item" href="{% url 'core:gerar_relatorio' %}?q={{ request.GET.q|default:'' }}&status={{ request.GET.status|default:'' }}&departamento={{ depto.id }}" target="_blank">
+                            <i class="bi bi-building me-2"></i> {{ depto.nome }}
+                        </a>
+                    </li>
+                {% empty %}
+                    <li><span class="dropdown-item text-muted small">Nenhum departamento</span></li>
+                {% endfor %}
+
+                <li><hr class="dropdown-divider"></li>
+
+                <li><h6 class="dropdown-header text-uppercase text-light">Por Categoria</h6></li>
+                {% for categoria in categorias %}
+                    <li>
+                        <a class="dropdown-item" href="{% url 'core:gerar_relatorio' %}?q={{ request.GET.q|default:'' }}&status={{ request.GET.status|default:'' }}&categoria={{ categoria.id }}" target="_blank">
+                            <i class="bi bi-tag me-2"></i> {{ categoria.nome }}
+                        </a>
+                    </li>
+                {% empty %}
+                    <li><span class="dropdown-item text-muted small">Nenhuma categoria</span></li>
+                {% endfor %}
+            </ul>
+        </div>
         {% endif %}
     </div>
 
