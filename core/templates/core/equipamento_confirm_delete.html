@@ -6,22 +6,25 @@
 {% block content %}
 <div class="container py-5 d-flex justify-content-center align-items-center" style="min-height: 60vh;">
 
-    <div class="card border-0 shadow-lg p-4 p-md-5 text-center fade-in" style="background: rgba(255, 255, 255, 0.02); border-radius: 1.5rem; border: 1px solid rgba(239, 68, 68, 0.15); max-width: 550px; width: 100%;">
+    <div class="card border-0 shadow-lg p-4 p-md-5 text-center fade-in hover-elevate" style="background: rgba(30, 30, 36, 0.6); border-radius: 1.5rem; border: 1px solid rgba(239, 68, 68, 0.2); backdrop-filter: blur(16px); max-width: 550px; width: 100%;">
 
-        <div class="mx-auto mb-4 rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 80px; height: 80px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2);">
-            <i class="bi bi-trash3 text-danger" style="font-size: 2.5rem; color: #ef4444 !important;"></i>
+        <div class="mx-auto mb-4 rounded-circle d-flex align-items-center justify-content-center shadow" style="width: 80px; height: 80px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3);">
+            <i class="bi bi-exclamation-triangle text-danger" style="font-size: 2.5rem; color: #f87171 !important;"></i>
         </div>
 
         <h3 class="fw-bold text-white mb-2">Confirmar Exclusão</h3>
-        <p class="text-muted mb-4">Você está prestes a apagar permanentemente este equipamento do sistema. Esta ação <strong>não poderá ser desfeita</strong>.</p>
+        <p class="text-muted mb-4">
+            Você está prestes a apagar permanentemente este equipamento do banco de dados. <br>
+            <span class="text-danger fw-medium">Esta ação não poderá ser desfeita.</span>
+        </p>
 
-        <div class="p-3 mb-5 rounded-4 shadow-sm" style="background: rgba(0,0,0,0.2); border: 1px dashed rgba(255,255,255,0.1);">
-            <small class="text-muted text-uppercase d-block mb-1" style="font-size: 0.7rem; letter-spacing: 0.05rem;">Equipamento Selecionado</small>
-            <span class="text-white fw-bold fs-5">{{ object.nome }}</span>
+        <div class="p-4 mb-5 rounded-4 shadow-sm" style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05);">
+            <small class="text-muted text-uppercase d-block mb-2 fw-semibold" style="font-size: 0.7rem; letter-spacing: 0.05rem;">Equipamento Selecionado</small>
+            <span class="text-white fw-bold fs-5 d-block mb-1">{{ object.nome }}</span>
 
             {% if object.codigo_patrimonio %}
-                <br><span class="badge mt-2 fw-normal" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: var(--text-muted);">
-                    Patrimônio: {{ object.codigo_patrimonio }}
+                <span class="badge fw-normal px-3 py-2 mt-2" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #94a3b8;">
+                    <i class="bi bi-upc-scan me-1"></i> Patrimônio: {{ object.codigo_patrimonio }}
                 </span>
             {% endif %}
         </div>
@@ -30,11 +33,11 @@
             {% csrf_token %}
             <div class="d-flex flex-column flex-sm-row justify-content-center gap-3">
 
-                <a href="{% url 'core:equipamento_detalhe' pk=object.pk %}" class="btn btn-glass px-4 py-3 flex-grow-1 fw-medium text-uppercase" style="font-size: 0.85rem; letter-spacing: 0.05rem;">
-                    Cancelar e Voltar
+                <a href="{% url 'core:equipamento_detalhe' pk=object.pk %}" class="btn btn-outline-light px-4 py-3 flex-grow-1 fw-medium text-uppercase hover-elevate" style="font-size: 0.85rem; letter-spacing: 0.05rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);">
+                    Cancelar
                 </a>
 
-                <button type="submit" class="btn px-4 py-3 flex-grow-1 shadow-sm fw-bold text-uppercase" style="background-color: rgba(239, 68, 68, 0.9); color: white; border: 1px solid #ef4444; font-size: 0.85rem; letter-spacing: 0.05rem; transition: all 0.3s ease;">
+                <button type="submit" class="btn px-4 py-3 flex-grow-1 shadow fw-bold text-uppercase hover-elevate text-white" style="background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); border: none; font-size: 0.85rem; letter-spacing: 0.05rem;">
                     <i class="bi bi-trash3-fill me-2"></i>Sim, Excluir
                 </button>
 

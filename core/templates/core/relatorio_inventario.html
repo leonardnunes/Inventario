@@ -3,81 +3,68 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Relatório de Inventário</title>
+    <title>Relatório de Auditoria - Inventário</title>
     <style>
-        body { font-family: 'Helvetica', 'Arial', sans-serif; color: #333; margin: 0; padding: 20px; font-size: 12px; }
-        .cabecalho { border-bottom: 2px solid #2c3e50; padding-bottom: 10px; margin-bottom: 20px; }
-        .titulo { font-size: 24px; font-weight: bold; color: #2c3e50; margin: 0; }
-        .info-meta { font-size: 12px; color: #7f8c8d; margin-top: 5px; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #333; margin: 0; padding: 20px; font-size: 11px; }
+        .cabecalho { border-bottom: 2px solid #1e293b; padding-bottom: 10px; margin-bottom: 20px; }
+        .titulo { font-size: 22px; font-weight: bold; color: #1e293b; margin: 0; }
+        .info-meta { font-size: 11px; color: #64748b; margin-top: 5px; }
 
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th { background-color: #f8f9fa; color: #2c3e50; font-weight: bold; text-align: left; padding: 10px; border-bottom: 2px solid #ddd; text-transform: uppercase; font-size: 11px; }
-        td { padding: 10px; border-bottom: 1px solid #eee; vertical-align: middle; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; table-layout: fixed; }
+        th { background-color: #f1f5f9; color: #1e293b; font-weight: 700; text-align: left; padding: 8px; border-bottom: 2px solid #cbd5e1; text-transform: uppercase; font-size: 10px; }
+        td { padding: 8px; border-bottom: 1px solid #e2e8f0; vertical-align: middle; word-wrap: break-word; }
 
         .text-right { text-align: right; }
+        .badge { padding: 2px 6px; border-radius: 4px; font-size: 9px; font-weight: bold; text-transform: uppercase; }
+        .badge-disponivel { color: #065f46; }
+        .badge-em-uso { color: #1e40af; }
+        .badge-manutencao { color: #92400e; }
+        .badge-descartado { color: #991b1b; }
 
-        .badge { padding: 3px 8px; border-radius: 12px; font-size: 10px; font-weight: bold; text-transform: uppercase; }
-        .badge-disponivel { background-color: #d1fae5; color: #065f46; }
-        .badge-em-uso { background-color: #dbeafe; color: #1e40af; }
-        .badge-manutencao { background-color: #fef3c7; color: #92400e; }
-        .badge-descartado { background-color: #fee2e2; color: #991b1b; }
+        .resumo-financeiro { margin-top: 25px; padding: 15px; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 4px; text-align: right; font-size: 12px; color: #1e293b; page-break-inside: avoid; }
+        .valor-total { font-size: 14px; font-weight: bold; color: #059669; }
 
-        /* Nova classe para o rodapé financeiro */
-        .resumo-financeiro { margin-top: 25px; padding: 15px; background-color: #f8f9fa; border: 1px solid #ddd; border-radius: 4px; text-align: right; font-size: 12px; color: #2c3e50; page-break-inside: avoid; }
-        .valor-total { font-size: 16px; font-weight: bold; color: #065f46; }
+        .rodape { margin-top: 40px; border-top: 1px solid #e2e8f0; padding-top: 10px; text-align: center; font-size: 9px; color: #94a3b8; }
+        .assinatura { width: 200px; border-top: 1px solid #333; margin: 50px auto 0; text-align: center; padding-top: 5px; font-size: 10px; }
 
-        .rodape { margin-top: 40px; border-top: 1px solid #ddd; padding-top: 10px; text-align: center; font-size: 10px; color: #95a5a6; }
-        .assinatura { width: 250px; border-top: 1px solid #333; margin: 40px auto 0; text-align: center; padding-top: 5px; page-break-inside: avoid; }
-
-        @media print {
-            body { padding: 0; }
-            @page { margin: 1.5cm; size: A4; }
-        }
+        @media print { body { padding: 0; } @page { margin: 1cm; size: A4; } }
     </style>
 </head>
 <body onload="window.print()">
     <div class="cabecalho">
-        <h1 class="titulo">Relatório de Inventário Físico</h1>
+        <h1 class="titulo">Relatório de Auditoria Patrimonial</h1>
         <div class="info-meta">
             Gerado em: {{ data_geracao|date:"d/m/Y H:i" }} | Total de Itens: {{ total_itens }}
-            {% if request.GET.departamento %} | Filtro: Departamento{% endif %}
-            {% if request.GET.categoria %} | Filtro: Categoria{% endif %}
-            {% if request.GET.status %} | Filtro: Status ({{ request.GET.status|title }}){% endif %}
         </div>
     </div>
 
     <table>
         <thead>
             <tr>
-                <th width="12%">Patrimônio</th>
-                <th width="25%">Equipamento</th>
-                <th width="18%">Marca / Modelo</th>
-                <th width="15%">Localização</th>
-                <th width="15%">Situação</th>
-                <th width="15%" class="text-right">Valor Estimado</th>
+                <th width="10%">Patrimônio</th>
+                <th width="20%">Equipamento</th>
+                <th width="15%">Marca/Modelo</th>
+                <th width="15%">Departamento</th>
+                <th width="10%">Situação</th>
+                <th width="15%" class="text-right">Valor Compra</th>
+                <th width="15%" class="text-right">Valor Atual</th>
             </tr>
         </thead>
         <tbody>
             {% for item in equipamentos %}
             <tr>
-                <td><strong>{{ item.codigo_patrimonio|default:"N/D" }}</strong></td>
+                <td><strong>{{ item.codigo_patrimonio|default:"-" }}</strong></td>
                 <td>{{ item.nome }}</td>
-                <td>{{ item.marca|default:"-" }} <br><span style="font-size: 10px; color: #7f8c8d;">{{ item.modelo|default:"" }}</span></td>
-                <td>{{ item.departamento.nome|default:"-" }} <br><span style="font-size: 10px; color: #7f8c8d;">{{ item.localizacao.nome|default:"" }}</span></td>
+                <td>{{ item.marca|default:"-" }} / {{ item.modelo|default:"-" }}</td>
+                <td>{{ item.departamento.nome|default:"-" }}</td>
                 <td>
                     {% if item.situacao == 'disponivel' %}<span class="badge badge-disponivel">Disponível</span>
                     {% elif item.situacao == 'em_uso' %}<span class="badge badge-em-uso">Em Uso</span>
                     {% elif item.situacao == 'manutencao' %}<span class="badge badge-manutencao">Manutenção</span>
-                    {% else %}<span class="badge badge-descartado">Descartado</span>
-                    {% endif %}
+                    {% else %}<span class="badge badge-descartado">Descartado</span>{% endif %}
                 </td>
-                <td class="text-right">
-                    R$ {{ item.preco_aproximado|default_if_none:"0"|floatformat:2|intcomma }}
-                </td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="6" style="text-align: center; color: #7f8c8d;">Nenhum equipamento encontrado com estes filtros.</td>
+                <td class="text-right">R$ {{ item.preco_aproximado|default_if_none:"0"|floatformat:2|intcomma }}</td>
+                <td class="text-right" style="font-weight: bold; color: #059669;">R$ {{ item.valor_depreciado|floatformat:2|intcomma }}</td>
             </tr>
             {% endfor %}
         </tbody>
@@ -86,18 +73,15 @@
     <div class="resumo-financeiro">
         <strong>Resumo da Auditoria</strong><br>
         <span style="display: inline-block; margin-top: 5px;">
-            Total de Itens Listados: <strong>{{ total_itens }}</strong> <br>
-            Valor Total do Patrimônio Listado: <span class="valor-total">R$ {{ valor_total|default_if_none:"0"|floatformat:2|intcomma }}</span>
+            Investimento Inicial: R$ {{ valor_total|default_if_none:"0"|floatformat:2|intcomma }} <br>
+            <strong>Patrimônio Líquido Atual: <span class="valor-total">R$ {{ total_valor_depreciado|default_if_none:"0"|floatformat:2|intcomma }}</span></strong>
         </span>
     </div>
 
-    <div class="assinatura">
-        Assinatura do Responsável
-    </div>
+    <div class="assinatura">Assinatura do Responsável</div>
 
     <div class="rodape">
-        Inventário - Sistema de Gestão Patrimonial | Relatório emitido eletronicamente.
+        Inventário - Sistema de Gestão Patrimonial | Relatório gerado automaticamente para fins de auditoria física.
     </div>
-
 </body>
 </html>

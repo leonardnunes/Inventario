@@ -3,8 +3,10 @@ colorama==0.4.6
 dj-database-url==3.0.1
 Django==4.2.24
 django-formtools==2.5.1
+django-jazzmin==3.0.4
 gunicorn==23.0.0
 packaging==25.0
+pi==0.1.2
 pillow==11.3.0
 psycopg2-binary==2.9.10
 python-decouple==3.8

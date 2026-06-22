@@ -4,42 +4,227 @@
 {% block title %}Importar Equipamentos - Inventário{% endblock %}
 
 {% block content %}
-<div class="container py-4">
+<style>
+    .drop-zone {
+        background: rgba(0, 0, 0, 0.2);
+        border: 2px dashed rgba(255, 255, 255, 0.15);
+        border-radius: 1rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .drop-zone:hover, .drop-zone.dragover {
+        background: rgba(14, 165, 233, 0.05);
+        border-color: #38bdf8;
+    }
+
+    .drop-zone input[type="file"] {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        opacity: 0;
+        cursor: pointer;
+        z-index: 2;
+    }
+</style>
+
+<div class="container py-2">
     <div class="d-flex align-items-center mb-4">
-        <a href="{% url 'core:lista_equipamentos' %}" class="btn btn-outline-secondary btn-sm me-3"><i class="bi bi-arrow-left"></i></a>
+        <a href="{% url 'core:lista_equipamentos' %}" class="btn btn-outline-light btn-sm me-3 hover-elevate" style="border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05);">
+            <i class="bi bi-arrow-left"></i>
+        </a>
         <div>
-            <h2 class="fw-bold text-white mb-1">Importar via CSV</h2>
-            <p class="text-muted mb-0">Suba seu acervo em massa com segurança</p>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1" style="font-size: 0.75rem; letter-spacing: 0.05rem;">
+                    <li class="breadcrumb-item"><a href="{% url 'core:lista_equipamentos' %}" class="text-muted text-decoration-none text-uppercase fw-medium">Equipamentos</a></li>
+                    <li class="breadcrumb-item active text-info text-uppercase fw-bold" aria-current="page">Importação em Massa</li>
+                </ol>
+            </nav>
+            <h2 class="fw-bold text-white mb-0">Importar via CSV</h2>
         </div>
     </div>
 
-    <div class="card border-0 shadow-lg p-4" style="background: rgba(255,255,255,0.02); border-radius: 1.5rem; border: 1px solid rgba(255,255,255,0.05);">
+    <div class="row g-4">
+        <div class="col-lg-5">
+            <div class="card border-0 p-4 h-100 shadow-sm" style="background: rgba(255,255,255,0.02); border-radius: 1.5rem; border: 1px solid rgba(255,255,255,0.05);">
+                <h5 class="text-white mb-4 fw-bold"><i class="bi bi-info-circle me-2 text-info"></i>Padrão de Importação</h5>
 
-        <h5 class="text-white mb-4"><i class="bi bi-info-circle me-2 text-info"></i>Instruções de Importação</h5>
+                <div class="d-flex flex-column gap-3">
+                    <div class="d-flex align-items-start gap-3 p-3 rounded" style="background: rgba(255,255,255,0.02);">
+                        <i class="bi bi-filetype-csv fs-4 text-muted"></i>
+                        <div>
+                            <span class="d-block text-light fw-medium small mb-1">Formato do Arquivo</span>
+                            <span class="text-muted" style="font-size: 0.8rem;">O arquivo deve ser obrigatoriamente <strong>.csv</strong> codificado em <strong>UTF-8</strong>, usando ponto-e-vírgula (<strong>;</strong>) como delimitador.</span>
+                        </div>
+                    </div>
 
-        <ul class="text-muted small mb-4 ps-3">
-            <li class="mb-2">O arquivo deve ser um <strong>.csv</strong> codificado em <strong>UTF-8</strong>.</li>
-            <li class="mb-2">O delimitador de colunas deve ser um ponto-e-vírgula (<strong>;</strong>).</li>
-            <li class="mb-2"><strong>Formato de Datas:</strong> DD/MM/AAAA (ex: 22/10/2026).</li>
-            <li><strong>Situação:</strong> Deve ser o texto exato (ex: "Em Uso", "Disponível").</li>
-        </ul>
+                    <div class="d-flex align-items-start gap-3 p-3 rounded" style="background: rgba(255,255,255,0.02);">
+                        <i class="bi bi-calendar3 fs-4 text-muted"></i>
+                        <div>
+                            <span class="d-block text-light fw-medium small mb-1">Padrão de Datas</span>
+                            <span class="text-muted" style="font-size: 0.8rem;">Utilize o formato brasileiro: <strong>DD/MM/AAAA</strong> (ex: 22/10/2026).</span>
+                        </div>
+                    </div>
 
-        <div class="mb-4 p-3 rounded" style="background: #0f172a; border: 1px solid #334155; font-family: 'Courier New', Courier, monospace;">
-            <p class="text-info small mb-1 opacity-75">Ordem esperada das colunas:</p>
-            <code class="text-light" style="word-break: break-all;">ID;Código de Patrimônio;Nome;Marca;Modelo;Número de Série;Categoria;Localização;Departamento;Situação;Data de Entrada;Data de Saída;Preço;Observações</code>
+                    <div class="d-flex align-items-start gap-3 p-3 rounded" style="background: rgba(255,255,255,0.02);">
+                        <i class="bi bi-check2-circle fs-4 text-muted"></i>
+                        <div>
+                            <span class="d-block text-light fw-medium small mb-1">Nomenclatura de Situação</span>
+                            <span class="text-muted" style="font-size: 0.8rem;">Utilize os textos exatos previstos no sistema: "Em Uso", "Disponível", "Em Manutenção" ou "Descartado".</span>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="my-4" style="border-color: rgba(255,255,255,0.05);">
+
+                <label class="text-muted small d-block fw-semibold mb-2" style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05rem;">Ordem Exata das Colunas (Cabeçalho)</label>
+                <div class="p-3 rounded-3" style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); font-family: 'Courier New', Courier, monospace;">
+                    <code class="text-info opacity-75" style="word-break: break-all; font-size: 0.8rem;">
+                        ID;Código de Patrimônio;Nome;Marca;Modelo;Número de Série;Categoria;Localização;Departamento;Situação;Data de Entrada;Data de Saída;Preço;Observações
+                    </code>
+                </div>
+            </div>
         </div>
 
-        <form method="post" enctype="multipart/form-data">
-            {% csrf_token %}
-            <div class="mb-4">
-                <label class="form-label text-white fw-medium">Selecione o arquivo .csv:</label>
-                <input type="file" name="csv_file" class="form-control form-control-lg border-0 shadow-none" style="background: rgba(255,255,255,0.05); color: white;" accept=".csv" required>
-            </div>
+        <div class="col-lg-7">
+            <div class="card border-0 p-4 h-100 shadow-sm" style="background: rgba(255,255,255,0.02); border-radius: 1.5rem; border: 1px solid rgba(255,255,255,0.05);">
 
-            <button type="submit" class="btn btn-Inventario-gradient btn-lg px-5 shadow-sm">
-                <i class="bi bi-cloud-upload me-2"></i> Importar Agora
-            </button>
-        </form>
+                <form method="post" enctype="multipart/form-data" id="upload-form" class="h-100 d-flex flex-column">
+                    {% csrf_token %}
+
+                    <div id="drop-zone" class="drop-zone flex-grow-1 d-flex flex-column align-items-center justify-content-center p-5 text-center mb-4">
+                        <i class="bi bi-cloud-arrow-up display-3 mb-3 text-muted" id="upload-icon" style="transition: color 0.3s;"></i>
+                        <h5 class="text-white fw-bold mb-2">Arraste e solte o seu CSV aqui</h5>
+                        <p class="text-muted small mb-0">ou clique para procurar no seu computador</p>
+
+                        <input type="file" name="csv_file" id="csv-input" accept=".csv" required>
+
+                        <div id="file-feedback" class="d-none mt-4 p-3 rounded-pill d-flex align-items-center gap-2" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); z-index: 3;">
+                            <i class="bi bi-file-earmark-spreadsheet-fill text-success fs-5"></i>
+                            <span id="file-name" class="text-white fw-medium small text-truncate" style="max-width: 200px;"></span>
+                            <span id="file-size" class="text-success small opacity-75 fw-bold ms-1"></span>
+                            <button type="button" class="btn-close btn-close-white ms-2" style="font-size: 0.6rem; opacity: 0.5;" id="btn-remove-file"></button>
+                        </div>
+                    </div>
+
+                    <button type="submit" id="btn-submit" class="btn btn-lg w-100 shadow hover-elevate text-white fw-bold" style="background: linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%); border: none; transition: all 0.3s;" disabled>
+                        <i class="bi bi-database-up me-2"></i> Iniciar Importação de Dados
+                    </button>
+                </form>
+
+            </div>
+        </div>
     </div>
 </div>
+
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('csv-input');
+        const fileFeedback = document.getElementById('file-feedback');
+        const fileNameSpan = document.getElementById('file-name');
+        const fileSizeSpan = document.getElementById('file-size');
+        const btnRemove = document.getElementById('btn-remove-file');
+        const btnSubmit = document.getElementById('btn-submit');
+        const uploadIcon = document.getElementById('upload-icon');
+        const form = document.getElementById('upload-form');
+
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            window.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone.addEventListener(eventName, () => {
+                dropZone.classList.add('dragover');
+                uploadIcon.classList.remove('text-muted');
+                uploadIcon.classList.add('text-info');
+            }, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, () => {
+                dropZone.classList.remove('dragover');
+                if (!fileInput.value) {
+                    uploadIcon.classList.remove('text-info');
+                    uploadIcon.classList.add('text-muted');
+                }
+            }, false);
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+
+            if (files.length > 0) {
+                fileInput.files = files;
+                handleFileSelect();
+            }
+        });
+
+        fileInput.addEventListener('change', handleFileSelect);
+
+        function handleFileSelect() {
+            if (fileInput.files.length > 0) {
+                const file = fileInput.files[0];
+
+                if (!file.name.endsWith('.csv')) {
+                    alert('Por favor, selecione um arquivo com a extensão .csv');
+                    resetDropZone();
+                    return;
+                }
+
+
+                const fileSize = (file.size / 1024).toFixed(1);
+                let sizeText = `${fileSize} KB`;
+                if (fileSize > 1024) {
+                    sizeText = `${(fileSize / 1024).toFixed(2)} MB`;
+                }
+
+                fileNameSpan.textContent = file.name;
+                fileSizeSpan.textContent = `(${sizeText})`;
+                fileFeedback.classList.remove('d-none');
+                uploadIcon.classList.remove('text-muted');
+                uploadIcon.classList.add('text-success');
+                btnSubmit.disabled = false;
+                btnSubmit.style.opacity = '1';
+            }
+        }
+
+        function resetDropZone() {
+            fileInput.value = '';
+            fileFeedback.classList.add('d-none');
+            uploadIcon.classList.remove('text-success', 'text-info');
+            uploadIcon.classList.add('text-muted');
+            btnSubmit.disabled = true;
+            btnSubmit.style.opacity = '0.6';
+        }
+
+        btnRemove.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            resetDropZone();
+        });
+
+        form.addEventListener('submit', function() {
+            if (!btnSubmit.disabled) {
+                btnSubmit.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Processando Arquivo...';
+                btnSubmit.disabled = true;
+            }
+        });
+
+        resetDropZone();
+    });
+</script>
 {% endblock %}

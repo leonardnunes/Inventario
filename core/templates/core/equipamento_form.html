@@ -6,61 +6,66 @@
 {% block content %}
 <style>
     .custom-form-group label {
-        color: var(--text-muted);
+        color: #94a3b8;
         font-size: 0.75rem;
         text-transform: uppercase;
         font-weight: 600;
         letter-spacing: 0.05rem;
-        margin-bottom: 0.4rem;
+        margin-bottom: 0.5rem;
         display: block;
     }
 
     .glass-input {
-        background: rgba(255, 255, 255, 0.03) !important;
+        background: rgba(0, 0, 0, 0.2) !important;
         border: 1px solid rgba(255, 255, 255, 0.08) !important;
         color: #ffffff !important;
         border-radius: 0.5rem;
-        padding: 0.6rem 1rem;
+        padding: 0.7rem 1rem;
         width: 100%;
-        transition: all 0.3s ease;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .glass-input:focus {
-        background: rgba(255, 255, 255, 0.06) !important;
-        border-color: var(--brand-light) !important;
-        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15) !important;
+        background: rgba(0, 0, 0, 0.4) !important;
+        border-color: #38bdf8 !important;
+        box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.15) !important;
         outline: none;
     }
 
     select.glass-input option {
-        background-color: #1e293b;
+        background-color: #1e1e24;
         color: white;
+        padding: 10px;
     }
 
     input[type="file"].glass-input {
-        padding: 0.45rem 1rem;
-        color: var(--text-muted) !important;
+        padding: 0.45rem;
+        color: #94a3b8 !important;
+        cursor: pointer;
+    }
+    input[type="file"].glass-input::file-selector-button {
+        background: rgba(255,255,255,0.05);
+        border: 1px solid rgba(255,255,255,0.1);
+        color: white;
+        padding: 0.4rem 1rem;
+        border-radius: 0.3rem;
+        margin-right: 1rem;
+        transition: all 0.2s;
+        cursor: pointer;
+    }
+    input[type="file"].glass-input::file-selector-button:hover {
+        background: rgba(255,255,255,0.1);
     }
 
     input[type="date"].glass-input {
         color-scheme: dark;
     }
-
     @supports (-webkit-appearance: none) {
-        input[type="date"].glass-input {
-            position: relative;
-        }
-        input[type="date"].glass-input::-webkit-datetime-edit-fields-wrapper {
-            padding-right: 1.5rem;
-        }
         input[type="date"].glass-input::-webkit-calendar-picker-indicator {
-            position: absolute;
-            right: 0.8rem;
-            top: 50%;
-            transform: translateY(-50%);
-            filter: invert(0.8);
+            filter: invert(0.8) sepia(1) hue-rotate(180deg) saturate(200%);
             cursor: pointer;
-            background-color: transparent;
+            opacity: 0.6;
+            transition: opacity 0.2s;
         }
         input[type="date"].glass-input::-webkit-calendar-picker-indicator:hover {
             opacity: 1;
@@ -72,27 +77,27 @@
 
     <div class="d-flex align-items-center mb-4">
         {% if object %}
-            <a href="{% url 'core:equipamento_detalhe' object.pk %}" class="btn btn-glass btn-sm me-3"><i class="bi bi-arrow-left"></i></a>
+            <a href="{% url 'core:equipamento_detalhe' object.pk %}" class="btn btn-outline-light btn-sm me-3" style="border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05);"><i class="bi bi-arrow-left"></i></a>
         {% else %}
-            <a href="{% url 'core:lista_equipamentos' %}" class="btn btn-glass btn-sm me-3"><i class="bi bi-arrow-left"></i></a>
+            <a href="{% url 'core:lista_equipamentos' %}" class="btn btn-outline-light btn-sm me-3" style="border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05);"><i class="bi bi-arrow-left"></i></a>
         {% endif %}
 
         <div>
             <nav aria-label="breadcrumb">
-                <ol class="breadcrumb mb-1" style="font-size: 0.75rem; letter-spacing: 0.05rem; text-uppercase: true;">
-                    <li class="breadcrumb-item"><a href="{% url 'core:lista_equipamentos' %}" class="text-muted text-decoration-none text-uppercase">Equipamentos</a></li>
-                    <li class="breadcrumb-item active text-info text-uppercase" aria-current="page">{% if object %}Edição{% else %}Novo Cadastro{% endif %}</li>
+                <ol class="breadcrumb mb-1" style="font-size: 0.75rem; letter-spacing: 0.05rem;">
+                    <li class="breadcrumb-item"><a href="{% url 'core:lista_equipamentos' %}" class="text-muted text-decoration-none text-uppercase fw-medium">Equipamentos</a></li>
+                    <li class="breadcrumb-item active text-info text-uppercase fw-bold" aria-current="page">{% if object %}Edição de Ficha{% else %}Novo Cadastro{% endif %}</li>
                 </ol>
             </nav>
-            <h2 class="fw-bold text-white mb-0">{% if object %}{{ object.nome }}{% else %}Novo Equipamento{% endif %}</h2>
+            <h2 class="fw-bold text-white mb-0">{% if object %}Editar: {{ object.nome }}{% else %}Novo Equipamento{% endif %}</h2>
         </div>
     </div>
 
     {% if form.errors %}
-        <div class="alert shadow-sm border-0 rounded-4 mb-4 p-4 fade-in" style="background: rgba(220, 53, 69, 0.1); border-left: 4px solid #ef4444 !important;">
+        <div class="alert shadow-lg border-0 rounded-4 mb-4 p-4 fade-in" style="background: rgba(239, 68, 68, 0.1); border-left: 4px solid #ef4444 !important; backdrop-filter: blur(10px);">
             <div class="d-flex align-items-center mb-2">
                 <i class="bi bi-exclamation-triangle-fill fs-5 me-2" style="color: #f87171;"></i>
-                <strong style="color: #fca5a5;">Existem problemas que precisam ser corrigidos:</strong>
+                <strong style="color: #fca5a5;">Atenção: Verifique os campos abaixo antes de salvar.</strong>
             </div>
             <ul class="mb-0 text-white opacity-75 small">
                 {% for error in form.non_field_errors %}
@@ -113,23 +118,23 @@
         <div class="row g-4 mb-4">
 
             <div class="col-lg-6">
-                <div class="card border-0 p-4 h-100 shadow-sm" style="background: rgba(255,255,255,0.02); border-radius: 1.5rem; border: 1px solid rgba(255,255,255,0.03);">
+                <div class="card border-0 p-4 h-100 shadow-sm" style="background: rgba(255,255,255,0.02); border-radius: 1.5rem; border: 1px solid rgba(255,255,255,0.05);">
                     <h6 class="text-info text-uppercase small mb-4 fw-bold" style="letter-spacing: 0.05rem;">
-                        <i class="bi bi-upc-scan me-2"></i>Identificação e Dados Técnicos
+                        <i class="bi bi-cpu me-2"></i>Identificação e Dados Técnicos
                     </h6>
 
-                    <div class="custom-form-group mb-3">{{ form.nome.label_tag }} {{ form.nome }}</div>
+                    <div class="custom-form-group mb-4">{{ form.nome.label_tag }} {{ form.nome }}</div>
 
-                    <div class="row g-3">
-                        <div class="col-md-6 custom-form-group mb-3">{{ form.marca.label_tag }} {{ form.marca }}</div>
-                        <div class="col-md-6 custom-form-group mb-3">{{ form.modelo.label_tag }} {{ form.modelo }}</div>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6 custom-form-group">{{ form.marca.label_tag }} {{ form.marca }}</div>
+                        <div class="col-md-6 custom-form-group">{{ form.modelo.label_tag }} {{ form.modelo }}</div>
                     </div>
 
-                    <div class="custom-form-group mb-3">{{ form.numero_serie.label_tag }} {{ form.numero_serie }}</div>
+                    <div class="custom-form-group mb-4">{{ form.numero_serie.label_tag }} {{ form.numero_serie }}</div>
 
-                    <div class="row g-3">
-                        <div class="col-md-6 custom-form-group mb-3">{{ form.data_entrada.label_tag }} {{ form.data_entrada }}</div>
-                        <div class="col-md-6 custom-form-group mb-3">{{ form.preco_aproximado.label_tag }} {{ form.preco_aproximado }}</div>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6 custom-form-group">{{ form.data_entrada.label_tag }} {{ form.data_entrada }}</div>
+                        <div class="col-md-6 custom-form-group">{{ form.preco_aproximado.label_tag }} {{ form.preco_aproximado }}</div>
                     </div>
 
                     <div class="custom-form-group mb-0">{{ form.imagem.label_tag }} {{ form.imagem }}</div>
@@ -137,28 +142,28 @@
             </div>
 
             <div class="col-lg-6">
-                <div class="card border-0 p-4 h-100 shadow-sm" style="background: rgba(255,255,255,0.02); border-radius: 1.5rem; border: 1px solid rgba(255,255,255,0.03);">
+                <div class="card border-0 p-4 h-100 shadow-sm" style="background: rgba(255,255,255,0.02); border-radius: 1.5rem; border: 1px solid rgba(255,255,255,0.05);">
                     <h6 class="text-info text-uppercase small mb-4 fw-bold" style="letter-spacing: 0.05rem;">
-                        <i class="bi bi-box-seam me-2"></i>Logística e Situação
+                        <i class="bi bi-geo-alt me-2"></i>Logística e Situação
                     </h6>
 
-                    <div class="custom-form-group mb-3">{{ form.situacao.label_tag }} {{ form.situacao }}</div>
+                    <div class="custom-form-group mb-4">{{ form.situacao.label_tag }} {{ form.situacao }}</div>
 
-                    <div class="row g-3">
-                        <div class="col-md-6 custom-form-group mb-3">{{ form.categoria.label_tag }} {{ form.categoria }}</div>
-                        <div class="col-md-6 custom-form-group mb-3">{{ form.localizacao.label_tag }} {{ form.localizacao }}</div>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6 custom-form-group">{{ form.categoria.label_tag }} {{ form.categoria }}</div>
+                        <div class="col-md-6 custom-form-group">{{ form.localizacao.label_tag }} {{ form.localizacao }}</div>
                     </div>
 
-                    <div class="row g-3">
-                        <div class="col-md-6 custom-form-group mb-3">{{ form.departamento.label_tag }} {{ form.departamento }}</div>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6 custom-form-group">{{ form.departamento.label_tag }} {{ form.departamento }}</div>
                         {% if form.setor %}
-                            <div class="col-md-6 custom-form-group mb-3">{{ form.setor.label_tag }} {{ form.setor }}</div>
+                            <div class="col-md-6 custom-form-group">{{ form.setor.label_tag }} {{ form.setor }}</div>
                         {% endif %}
                     </div>
 
-                    <hr class="my-3" style="border-color: rgba(255,255,255,0.05);">
+                    <hr class="my-4" style="border-color: rgba(255,255,255,0.05);">
 
-                    <div class="custom-form-group mb-3">
+                    <div class="custom-form-group mb-4">
                         {{ form.data_saida.label_tag }}
                         {{ form.data_saida }}
                     </div>
@@ -171,21 +176,21 @@
             </div>
         </div>
 
-        <div class="card border-0 p-4 mb-5 shadow-sm" style="background: rgba(255,255,255,0.02); border-radius: 1.5rem; border: 1px solid rgba(255,255,255,0.03);">
+        <div class="card border-0 p-4 mb-5 shadow-sm" style="background: rgba(255,255,255,0.02); border-radius: 1.5rem; border: 1px solid rgba(255,255,255,0.05);">
             <div class="custom-form-group mb-0">
                 {{ form.observacoes.label_tag }}
                 {{ form.observacoes }}
             </div>
         </div>
 
-        <div class="d-flex align-items-center justify-content-end gap-3 pt-3 border-top" style="border-color: rgba(255,255,255,0.08) !important;">
+        <div class="d-flex align-items-center justify-content-end gap-3 pt-3 border-top" style="border-color: rgba(255,255,255,0.05) !important;">
             {% if object %}
-                <a href="{% url 'core:equipamento_detalhe' object.pk %}" class="btn btn-glass px-4 py-2">Cancelar</a>
+                <a href="{% url 'core:equipamento_detalhe' object.pk %}" class="btn btn-outline-light px-4 py-2 hover-elevate" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);">Cancelar</a>
             {% else %}
-                <a href="{% url 'core:lista_equipamentos' %}" class="btn btn-glass px-4 py-2">Cancelar</a>
+                <a href="{% url 'core:lista_equipamentos' %}" class="btn btn-outline-light px-4 py-2 hover-elevate" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);">Cancelar</a>
             {% endif %}
 
-            <button type="submit" class="btn btn-Inventario-gradient px-5 py-2 shadow-sm fw-bold">
+            <button type="submit" class="btn px-5 py-2 shadow hover-elevate text-white fw-bold" style="background: linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%); border: none;">
                 <i class="bi bi-check2-circle me-2"></i>Salvar Equipamento
             </button>
         </div>
@@ -194,19 +199,19 @@
 
 <div class="modal fade" id="modalDepartamento" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg" style="background: #1e293b; border-radius: 1rem;">
-            <div class="modal-header border-bottom-0" style="background: rgba(255,255,255,0.02);">
+        <div class="modal-content border-0 shadow-lg" style="background: rgba(30, 30, 36, 0.95); border-radius: 1rem; border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(15px);">
+            <div class="modal-header border-bottom-0">
                 <h5 class="modal-title text-white fw-bold"><i class="bi bi-building me-2 text-info"></i>Novo Departamento</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                <button type="button" class="btn-close btn-close-white opacity-50" data-bs-dismiss="modal" aria-label="Fechar"></button>
             </div>
-            <div class="modal-body">
-                <label class="form-label small text-muted text-uppercase" style="letter-spacing: 0.05rem;">Nome do Departamento</label>
-                <input type="text" id="novo-departamento-nome" class="form-control border-0 text-white" style="background: rgba(255,255,255,0.05);" placeholder="Ex: Som, Multimídia, Diretoria...">
+            <div class="modal-body pt-0">
+                <label class="form-label small text-muted text-uppercase fw-semibold" style="letter-spacing: 0.05rem;">Nome do Departamento</label>
+                <input type="text" id="novo-departamento-nome" class="form-control border-0 text-white p-3" style="background: rgba(0,0,0,0.3); border-radius: 0.5rem;" placeholder="Ex: Som, Multimídia, Diretoria...">
                 <div id="erro-departamento" class="text-danger small mt-2 d-none"><i class="bi bi-exclamation-triangle me-1"></i><span></span></div>
             </div>
             <div class="modal-footer border-top-0 pt-0">
-                <button type="button" class="btn btn-sm btn-glass px-4" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-sm btn-Inventario-gradient px-4 shadow-sm" id="btn-salvar-departamento">Salvar</button>
+                <button type="button" class="btn btn-sm btn-outline-light px-4" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-sm btn-primary px-4 shadow-sm fw-medium" id="btn-salvar-departamento">Salvar</button>
             </div>
         </div>
     </div>
@@ -214,19 +219,19 @@
 
 <div class="modal fade" id="modalCategoria" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg" style="background: #1e293b; border-radius: 1rem;">
-            <div class="modal-header border-bottom-0" style="background: rgba(255,255,255,0.02);">
+        <div class="modal-content border-0 shadow-lg" style="background: rgba(30, 30, 36, 0.95); border-radius: 1rem; border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(15px);">
+            <div class="modal-header border-bottom-0">
                 <h5 class="modal-title text-white fw-bold"><i class="bi bi-tags me-2 text-warning"></i>Nova Categoria</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                <button type="button" class="btn-close btn-close-white opacity-50" data-bs-dismiss="modal" aria-label="Fechar"></button>
             </div>
-            <div class="modal-body">
-                <label class="form-label small text-muted text-uppercase" style="letter-spacing: 0.05rem;">Nome da Categoria</label>
-                <input type="text" id="nova-categoria-nome" class="form-control border-0 text-white" style="background: rgba(255,255,255,0.05);" placeholder="Ex: Áudio, Instrumentos, Cabos...">
+            <div class="modal-body pt-0">
+                <label class="form-label small text-muted text-uppercase fw-semibold" style="letter-spacing: 0.05rem;">Nome da Categoria</label>
+                <input type="text" id="nova-categoria-nome" class="form-control border-0 text-white p-3" style="background: rgba(0,0,0,0.3); border-radius: 0.5rem;" placeholder="Ex: Áudio, Instrumentos, Cabos...">
                 <div id="erro-categoria" class="text-danger small mt-2 d-none"><i class="bi bi-exclamation-triangle me-1"></i><span></span></div>
             </div>
             <div class="modal-footer border-top-0 pt-0">
-                <button type="button" class="btn btn-sm btn-glass px-4" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-sm btn-Inventario-gradient px-4 shadow-sm" id="btn-salvar-categoria">Salvar</button>
+                <button type="button" class="btn btn-sm btn-outline-light px-4" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-sm btn-primary px-4 shadow-sm fw-medium" id="btn-salvar-categoria">Salvar</button>
             </div>
         </div>
     </div>
@@ -275,14 +280,17 @@
             const btn = document.createElement('button');
             btn.className = 'btn border-start-0';
             btn.type = 'button';
-            btn.style.background = 'rgba(255, 255, 255, 0.03)';
+            btn.style.background = 'rgba(0, 0, 0, 0.2)';
             btn.style.borderColor = 'rgba(255, 255, 255, 0.08)';
             btn.style.borderTopRightRadius = '0.5rem';
             btn.style.borderBottomRightRadius = '0.5rem';
+            btn.style.transition = 'all 0.2s';
             btn.innerHTML = '<i class="bi bi-plus-lg text-info"></i>';
             btn.setAttribute('data-bs-toggle', 'modal');
             btn.setAttribute('data-bs-target', modalTarget);
             btn.title = "Adicionar novo";
+            btn.onmouseover = function() { this.style.background = 'rgba(255, 255, 255, 0.1)'; }
+            btn.onmouseout = function() { this.style.background = 'rgba(0, 0, 0, 0.2)'; }
 
             selectField.style.borderTopRightRadius = '0';
             selectField.style.borderBottomRightRadius = '0';

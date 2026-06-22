@@ -1,7 +1,46 @@
 {% extends 'core/base.html' %}
-{% load humanize %} {% block title %}Dashboard - Inventário{% endblock %}
+{% load humanize %}
+{% block title %}Dashboard - Inventário{% endblock %}
 
 {% block content %}
+<style>
+    .skeleton-box {
+        background-color: rgba(255, 255, 255, 0.05);
+        border-radius: 4px;
+        position: relative;
+        overflow: hidden;
+    }
+    .skeleton-box::after {
+        content: "";
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        transform: translateX(-100%);
+        background-image: linear-gradient(
+            90deg,
+            rgba(255, 255, 255, 0) 0,
+            rgba(255, 255, 255, 0.05) 20%,
+            rgba(255, 255, 255, 0.1) 60%,
+            rgba(255, 255, 255, 0)
+        );
+        animation: shimmer 1.5s infinite;
+    }
+    @keyframes shimmer {
+        100% { transform: translateX(100%); }
+    }
+
+    .skeleton-overlay {
+        background: #18181f;
+        border-radius: inherit;
+        z-index: 10;
+        transition: opacity 0.5s ease, visibility 0.5s ease;
+    }
+
+    .content-ready {
+        opacity: 0;
+        transition: opacity 0.5s ease;
+    }
+</style>
+
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h2 class="fw-bold mb-0 text-white">Visão Geral</h2>
@@ -11,11 +50,22 @@
 
     <div class="row g-3 mb-4">
         <div class="col-sm-6 col-xl-3">
-            <div class="card h-100 border-0 shadow-sm" style="background: rgba(255, 255, 255, 0.03); border-radius: 1rem; border-left: 4px solid #10b981 !important;">
-                <div class="card-body p-3 d-flex justify-content-between align-items-center">
+            <div class="card h-100 border-0 shadow-sm hover-elevate position-relative" style="background: rgba(255, 255, 255, 0.03); border-radius: 1rem; border-left: 4px solid #10b981 !important;">
+                <div class="skeleton-overlay position-absolute w-100 h-100 top-0 start-0 d-flex justify-content-between align-items-center p-3">
                     <div>
-                        <p class="text-muted text-uppercase small fw-semibold mb-1" style="letter-spacing: 0.05rem;">Patrimônio Estimado</p>
-                        <h4 class="fw-bold text-white mb-0">R$ {{ valor_total|floatformat:2|intcomma }}</h4>
+                        <div class="skeleton-box mb-2" style="width: 100px; height: 12px;"></div>
+                        <div class="skeleton-box mb-2" style="width: 130px; height: 22px;"></div>
+                        <div class="skeleton-box" style="width: 90px; height: 10px;"></div>
+                    </div>
+                    <div class="skeleton-box rounded-circle" style="width: 48px; height: 48px;"></div>
+                </div>
+                <div class="card-body p-3 d-flex justify-content-between align-items-center content-ready">
+                    <div>
+                        <p class="text-muted text-uppercase small fw-semibold mb-1" style="letter-spacing: 0.05rem;">Patrimônio Atual</p>
+                        <h4 class="fw-bold text-white mb-0">R$ {{ valor_atual_patrimonio|floatformat:2|intcomma }}</h4>
+                        <small class="text-danger" style="font-size: 0.75rem;">
+                            <i class="bi bi-graph-down-arrow"></i> - R$ {{ perda_depreciacao|floatformat:2|intcomma }} (Depreciado)
+                        </small>
                     </div>
                     <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 48px; height: 48px; background: rgba(16, 185, 129, 0.1); color: #10b981;">
                         <i class="bi bi-cash-stack fs-4"></i>
@@ -25,8 +75,15 @@
         </div>
 
         <div class="col-sm-6 col-xl-3">
-            <div class="card h-100 border-0 shadow-sm" style="background: rgba(255, 255, 255, 0.03); border-radius: 1rem; border-left: 4px solid var(--brand-light) !important;">
-                <div class="card-body p-3 d-flex justify-content-between align-items-center">
+            <div class="card h-100 border-0 shadow-sm hover-elevate position-relative" style="background: rgba(255, 255, 255, 0.03); border-radius: 1rem; border-left: 4px solid var(--brand-light) !important;">
+                <div class="skeleton-overlay position-absolute w-100 h-100 top-0 start-0 d-flex justify-content-between align-items-center p-3">
+                    <div>
+                        <div class="skeleton-box mb-2" style="width: 90px; height: 12px;"></div>
+                        <div class="skeleton-box" style="width: 60px; height: 22px;"></div>
+                    </div>
+                    <div class="skeleton-box rounded-circle" style="width: 48px; height: 48px;"></div>
+                </div>
+                <div class="card-body p-3 d-flex justify-content-between align-items-center content-ready">
                     <div>
                         <p class="text-muted text-uppercase small fw-semibold mb-1" style="letter-spacing: 0.05rem;">Total de Itens</p>
                         <h4 class="fw-bold text-white mb-0">{{ total_equipamentos }}</h4>
@@ -39,8 +96,15 @@
         </div>
 
         <div class="col-sm-6 col-xl-3">
-            <div class="card h-100 border-0 shadow-sm" style="background: rgba(255, 255, 255, 0.03); border-radius: 1rem; border-left: 4px solid #14b8a6 !important;">
-                <div class="card-body p-3 d-flex justify-content-between align-items-center">
+            <div class="card h-100 border-0 shadow-sm hover-elevate position-relative" style="background: rgba(255, 255, 255, 0.03); border-radius: 1rem; border-left: 4px solid #14b8a6 !important;">
+                <div class="skeleton-overlay position-absolute w-100 h-100 top-0 start-0 d-flex justify-content-between align-items-center p-3">
+                    <div>
+                        <div class="skeleton-box mb-2" style="width: 80px; height: 12px;"></div>
+                        <div class="skeleton-box" style="width: 50px; height: 22px;"></div>
+                    </div>
+                    <div class="skeleton-box rounded-circle" style="width: 48px; height: 48px;"></div>
+                </div>
+                <div class="card-body p-3 d-flex justify-content-between align-items-center content-ready">
                     <div>
                         <p class="text-muted text-uppercase small fw-semibold mb-1" style="letter-spacing: 0.05rem;">Disponíveis</p>
                         <h4 class="fw-bold text-white mb-0">{{ disponiveis|default:"0" }}</h4>
@@ -53,8 +117,15 @@
         </div>
 
         <div class="col-sm-6 col-xl-3">
-            <div class="card h-100 border-0 shadow-sm" style="background: rgba(255, 255, 255, 0.03); border-radius: 1rem; border-left: 4px solid #f59e0b !important;">
-                <div class="card-body p-3 d-flex justify-content-between align-items-center">
+            <div class="card h-100 border-0 shadow-sm hover-elevate position-relative" style="background: rgba(255, 255, 255, 0.03); border-radius: 1rem; border-left: 4px solid #f59e0b !important;">
+                <div class="skeleton-overlay position-absolute w-100 h-100 top-0 start-0 d-flex justify-content-between align-items-center p-3">
+                    <div>
+                        <div class="skeleton-box mb-2" style="width: 110px; height: 12px;"></div>
+                        <div class="skeleton-box" style="width: 40px; height: 22px;"></div>
+                    </div>
+                    <div class="skeleton-box rounded-circle" style="width: 48px; height: 48px;"></div>
+                </div>
+                <div class="card-body p-3 d-flex justify-content-between align-items-center content-ready">
                     <div>
                         <p class="text-muted text-uppercase small fw-semibold mb-1" style="letter-spacing: 0.05rem;">Em Manutenção</p>
                         <h4 class="fw-bold text-white mb-0">{{ em_manutencao }}</h4>
@@ -69,144 +140,194 @@
 
     <div class="row g-4 mb-4">
         <div class="col-lg-6">
-            <div class="card h-100 border-0 shadow-sm p-4" style="background: rgba(255, 255, 255, 0.02); border-radius: 1rem;">
-                <h5 class="fw-semibold text-white mb-4">Equipamentos por Categoria</h5>
-                <div style="position: relative; height: 300px; width: 100%; display: flex; justify-content: center;">
-                    <canvas id="categoriasChart"></canvas>
+            <div class="card h-100 border-0 shadow-sm p-4 position-relative" style="background: rgba(255, 255, 255, 0.02); border-radius: 1rem;">
+                <h5 class="fw-semibold text-white mb-4">Itens por Departamento</h5>
+                <div style="position: relative; height: 300px; width: 100%; display: flex; justify-content: center;" id="chart-dept-container">
+
+                    <div class="skeleton-overlay position-absolute w-100 h-100 top-0 start-0 d-flex align-items-center justify-content-center">
+                        <div class="skeleton-box rounded-circle border border-5" style="width: 220px; height: 220px; background: transparent; border-color: rgba(255,255,255,0.05) !important;"></div>
+                        <div class="ms-4 d-none d-md-flex flex-column gap-3">
+                            <div class="skeleton-box" style="width: 90px; height: 12px;"></div>
+                            <div class="skeleton-box" style="width: 120px; height: 12px;"></div>
+                            <div class="skeleton-box" style="width: 70px; height: 12px;"></div>
+                        </div>
+                    </div>
+
+                    <div class="content-ready w-100 h-100">
+                        {% if total_equipamentos == 0 %}
+                            <div class="d-flex align-items-center justify-content-center h-100 text-muted small">Nenhum equipamento cadastrado.</div>
+                        {% else %}
+                            <canvas id="departamentosChart"></canvas>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
         </div>
 
         <div class="col-lg-6">
-            <div class="card h-100 border-0 shadow-sm p-4" style="background: rgba(255, 255, 255, 0.02); border-radius: 1rem;">
-                <h5 class="fw-semibold text-white mb-4">Últimos Adicionados</h5>
-                <div class="list-group list-group-flush">
-                    {% for item in ultimos_adicionados %}
-                    <div class="list-group-item bg-transparent px-0 border-bottom py-3 d-flex justify-content-between align-items-center" style="border-color: rgba(255,255,255,0.05) !important;">
-                        <div class="d-flex align-items-center gap-3">
-                            <div class="rounded-circle d-flex justify-content-center align-items-center flex-shrink-0" style="width: 40px; height: 40px; background: rgba(255,255,255,0.05);">
-                                <i class="bi bi-tag text-muted"></i>
-                            </div>
-                            <div>
-                                <a href="{% url 'core:equipamento_detalhe' item.pk %}" class="mb-0 text-white fw-medium text-decoration-none d-block">{{ item.nome }}</a>
-                                <small class="text-muted" style="font-size: 0.8rem;">Cód: {{ item.codigo_patrimonio }}</small>
-                            </div>
+            <div class="card h-100 border-0 shadow-sm p-4 position-relative" style="background: rgba(255, 255, 255, 0.02); border-radius: 1rem;">
+                <h5 class="fw-semibold text-white mb-4">Itens por Categoria</h5>
+                <div style="position: relative; height: 300px; width: 100%; display: flex; justify-content: center;" id="chart-cat-container">
+
+                    <div class="skeleton-overlay position-absolute w-100 h-100 top-0 start-0 d-flex align-items-center justify-content-center">
+                        <div class="skeleton-box rounded-circle border border-5" style="width: 220px; height: 220px; background: transparent; border-color: rgba(255,255,255,0.05) !important;"></div>
+                        <div class="ms-4 d-none d-md-flex flex-column gap-3">
+                            <div class="skeleton-box" style="width: 90px; height: 12px;"></div>
+                            <div class="skeleton-box" style="width: 120px; height: 12px;"></div>
+                            <div class="skeleton-box" style="width: 70px; height: 12px;"></div>
                         </div>
-                        <span class="badge rounded-pill fw-normal px-3 py-2" style="background: rgba(51, 170, 255, 0.15); color: var(--brand-light);">
-                            Novo
-                        </span>
                     </div>
-                    {% empty %}
-                    <div class="text-center py-5 text-muted">
-                        <i class="bi bi-inbox fs-1 d-block mb-3 opacity-50"></i>
-                        Nenhum equipamento cadastrado ainda.
+
+                    <div class="content-ready w-100 h-100">
+                        {% if total_equipamentos == 0 %}
+                            <div class="d-flex align-items-center justify-content-center h-100 text-muted small">Nenhum equipamento cadastrado.</div>
+                        {% else %}
+                            <canvas id="categoriasChart"></canvas>
+                        {% endif %}
                     </div>
-                    {% endfor %}
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="card border-0 p-4 shadow-sm mb-5" style="background: rgba(255,255,255,0.02); border-radius: 1rem;">
-    <h5 class="fw-semibold text-white mb-4">
-        <i class="bi bi-activity text-info me-2"></i>Histórico Global de Movimentações
-    </h5>
+    <div class="row g-4 mb-5">
+        <div class="col-lg-4">
+            <div class="card h-100 border-0 shadow-sm p-4 position-relative" style="background: rgba(255, 255, 255, 0.02); border-radius: 1rem;">
+                <h5 class="fw-semibold text-white mb-4">Últimos Adicionados</h5>
 
-    <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0" style="border-collapse: separate; border-spacing: 0 0.25rem;">
-            <thead>
-                <tr class="text-muted small text-uppercase" style="letter-spacing: 0.05rem;">
-                    <th scope="col" class="border-bottom-0 pb-3 fw-medium">Data / Hora</th>
-                    <th scope="col" class="border-bottom-0 pb-3 fw-medium">Equipamento</th>
-                    <th scope="col" class="border-bottom-0 pb-3 fw-medium">Ação Registrada</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for mov in ultimas_movimentacoes %}
-                <tr>
-                    <td class="border-bottom-0 py-3" width="20%">
-                        <span class="text-muted small"><i class="bi bi-clock me-1"></i>{{ mov.data_registro|date:"d/m/Y H:i" }}</span>
-                    </td>
-                    <td class="border-bottom-0 py-3" width="30%">
-                        <a href="{% url 'core:equipamento_detalhe' mov.equipamento.pk %}" class="text-white text-decoration-none fw-medium" style="transition: color 0.2s;">
-                            {{ mov.equipamento.nome }}
-                        </a>
-                        <br>
-                        <small class="text-muted" style="font-size: 0.75rem;">{{ mov.equipamento.codigo_patrimonio }}</small>
-                    </td>
-                    <td class="border-bottom-0 py-3">
-                        <span class="text-light d-block mb-1" style="font-size: 0.9rem;">{{ mov.observacao }}</span>
-                        <small class="text-muted" style="font-size: 0.75rem;">
-                            <i class="bi bi-person-fill me-1"></i> Autor: <span class="text-capitalize text-light opacity-75">{{ mov.usuario.username|default:"Sistema" }}</span>
-                        </small>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="3" class="text-center py-5 border-bottom-0">
-                        <i class="bi bi-shield-check fs-1 d-block mb-3 opacity-50 text-muted"></i>
-                        <span class="text-muted">Nenhuma movimentação registrada no sistema ainda.</span>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                <div class="skeleton-overlay position-absolute w-100 h-100 top-0 start-0 p-4 pt-5 mt-3">
+                    <div class="d-flex gap-3 mb-4"><div class="skeleton-box rounded-circle" style="width: 40px; height: 40px;"></div><div class="w-100"><div class="skeleton-box mb-2" style="width: 60%; height: 14px;"></div><div class="skeleton-box" style="width: 30%; height: 10px;"></div></div></div>
+                    <div class="d-flex gap-3 mb-4"><div class="skeleton-box rounded-circle" style="width: 40px; height: 40px;"></div><div class="w-100"><div class="skeleton-box mb-2" style="width: 50%; height: 14px;"></div></div></div>
+                </div>
+
+                <div class="list-group list-group-flush content-ready">
+                    {% for item in ultimos_adicionados %}
+                    <div class="list-group-item bg-transparent px-0 border-bottom py-3 d-flex justify-content-between align-items-center hover-elevate" style="border-color: rgba(255,255,255,0.05) !important;">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="rounded-circle d-flex justify-content-center align-items-center flex-shrink-0" style="width: 36px; height: 36px; background: rgba(255,255,255,0.05);">
+                                <i class="bi bi-tag text-muted" style="font-size: 0.8rem;"></i>
+                            </div>
+                            <div>
+                                <a href="{% url 'core:equipamento_detalhe' item.pk %}" class="mb-0 text-white fw-medium text-decoration-none d-block" style="font-size: 0.9rem;">{{ item.nome }}</a>
+                                <small class="text-muted" style="font-size: 0.75rem;">Cód: {{ item.codigo_patrimonio }}</small>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="text-center py-4 text-muted">
+                        <i class="bi bi-inbox fs-2 d-block mb-2 opacity-50"></i>
+                        <small>Nenhum item cadastrado.</small>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+            <div class="card h-100 border-0 p-4 shadow-sm position-relative" style="background: rgba(255,255,255,0.02); border-radius: 1rem;">
+                <h5 class="fw-semibold text-white mb-4"><i class="bi bi-activity text-info me-2"></i>Histórico Global de Movimentações</h5>
+
+                <div class="skeleton-overlay position-absolute w-100 h-100 top-0 start-0 p-4 pt-5 mt-4">
+                    <div class="skeleton-box mb-3" style="width: 100%; height: 50px; border-radius: 8px;"></div>
+                    <div class="skeleton-box mb-3" style="width: 100%; height: 50px; border-radius: 8px;"></div>
+                </div>
+
+                <div class="table-responsive content-ready">
+                    <table class="table table-hover align-middle mb-0" style="border-collapse: separate; border-spacing: 0 0.25rem;">
+                        <thead>
+                            <tr class="text-muted small text-uppercase" style="letter-spacing: 0.05rem;">
+                                <th scope="col" class="border-bottom-0 pb-3 fw-medium">Data / Hora</th>
+                                <th scope="col" class="border-bottom-0 pb-3 fw-medium">Equipamento</th>
+                                <th scope="col" class="border-bottom-0 pb-3 fw-medium">Ação Registrada</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for mov in ultimas_movimentacoes %}
+                            <tr class="hover-elevate">
+                                <td class="border-bottom-0 py-3" width="25%" style="background: rgba(255,255,255,0.01); border-radius: 8px 0 0 8px;">
+                                    <span class="text-muted small"><i class="bi bi-clock me-1"></i>{{ mov.data_registro|date:"d/m/Y H:i" }}</span>
+                                </td>
+                                <td class="border-bottom-0 py-3" width="35%" style="background: rgba(255,255,255,0.01);">
+                                    <a href="{% url 'core:equipamento_detalhe' mov.equipamento.pk %}" class="text-white text-decoration-none fw-medium" style="font-size: 0.95rem; transition: color 0.2s;">
+                                        {{ mov.equipamento.nome }}
+                                    </a><br>
+                                    <small class="text-muted" style="font-size: 0.75rem;">{{ mov.equipamento.codigo_patrimonio }}</small>
+                                </td>
+                                <td class="border-bottom-0 py-3" style="background: rgba(255,255,255,0.01); border-radius: 0 8px 8px 0;">
+                                    <span class="text-light d-block mb-1" style="font-size: 0.85rem;">{{ mov.observacao }}</span>
+                                    <small class="text-muted" style="font-size: 0.7rem;">
+                                        <i class="bi bi-person-fill me-1"></i> {{ mov.usuario.username|default:"Sistema" }}
+                                    </small>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="3" class="text-center py-4 border-bottom-0 text-muted">Nenhuma movimentação.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
-</div>
+{% endblock %}
 
+{% block scripts %}
 <script>
     document.addEventListener("DOMContentLoaded", function() {
-        const ctx = document.getElementById('categoriasChart').getContext('2d');
 
-        try {
-            const chartLabels = JSON.parse('{{ chart_labels|escapejs }}');
-            const chartValues = JSON.parse('{{ chart_values|escapejs }}');
-            const chartColors = JSON.parse('{{ chart_colors|escapejs }}');
-
-            if (chartLabels.length > 0) {
-                const myChart = new Chart(ctx, {
-                    type: 'doughnut',
-                    data: {
-                        labels: chartLabels,
-                        datasets: [{
-                            data: chartValues,
-                            backgroundColor: chartColors,
-                            borderWidth: 0,
-                            hoverOffset: 6
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        cutout: '75%',
-                        plugins: {
-                            legend: {
-                                position: 'right',
-                                labels: {
-                                    color: '#94a3b8',
-                                    usePointStyle: true,
-                                    padding: 20,
-                                    font: {
-                                        family: "'Poppins', sans-serif",
-                                        size: 13
-                                    }
-                                }
-                            },
-                            tooltip: {
-                                backgroundColor: 'rgba(15, 23, 42, 0.9)',
-                                titleFont: { family: "'Poppins', sans-serif", size: 13 },
-                                bodyFont: { family: "'Poppins', sans-serif", size: 14 },
-                                padding: 12,
-                                cornerRadius: 8,
-                                displayColors: false
-                            }
-                        }
-                    }
-                });
+        const chartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '75%',
+            plugins: {
+                legend: { position: 'right', labels: { color: '#94a3b8', usePointStyle: true, padding: 15, font: { family: "'Poppins', sans-serif", size: 12 } } },
+                tooltip: { backgroundColor: 'rgba(15, 23, 42, 0.9)', padding: 12, cornerRadius: 8 }
             }
-        } catch (e) {
-            console.error("Erro ao renderizar o gráfico:", e);
+        };
+
+        const canvasDept = document.getElementById('departamentosChart');
+        if (canvasDept) {
+            try {
+                const deptLabels = JSON.parse('{{ chart_labels|escapejs }}');
+                const deptValues = JSON.parse('{{ chart_values|escapejs }}');
+                const deptColors = JSON.parse('{{ chart_colors|escapejs }}');
+
+                if (deptLabels.length > 0) {
+                    new Chart(canvasDept.getContext('2d'), {
+                        type: 'doughnut',
+                        data: { labels: deptLabels, datasets: [{ data: deptValues, backgroundColor: deptColors, borderWidth: 0, hoverOffset: 6 }] },
+                        options: chartOptions
+                    });
+                }
+            } catch (e) { console.error("Erro no gráfico de departamentos:", e); }
         }
+
+        const canvasCat = document.getElementById('categoriasChart');
+        if (canvasCat) {
+            try {
+                const catLabels = JSON.parse('{{ cat_labels|escapejs }}');
+                const catValues = JSON.parse('{{ cat_values|escapejs }}');
+                const catColors = JSON.parse('{{ cat_colors|escapejs }}');
+
+                if (catLabels.length > 0) {
+                    new Chart(canvasCat.getContext('2d'), {
+                        type: 'doughnut',
+                        data: { labels: catLabels, datasets: [{ data: catValues, backgroundColor: catColors, borderWidth: 0, hoverOffset: 6 }] },
+                        options: chartOptions
+                    });
+                }
+            } catch (e) { console.error("Erro no gráfico de categorias:", e); }
+        }
+
+        setTimeout(() => {
+            document.querySelectorAll('.skeleton-overlay').forEach(el => {
+                el.style.opacity = '0';
+                setTimeout(() => el.style.visibility = 'hidden', 500);
+            });
+            document.querySelectorAll('.content-ready').forEach(el => {
+                el.style.opacity = '1';
+            });
+        }, 400);
     });
 </script>
 {% endblock %}
