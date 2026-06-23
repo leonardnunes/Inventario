@@ -80,6 +80,7 @@ WHITENOISE_MANIFEST_STRICT = False
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
+# STATICFILES_DIRS mantido comentado para evitar conflitos
 #STATICFILES_DIRS = [
 #    os.path.join(BASE_DIR, 'static'),
 #]
@@ -95,7 +96,7 @@ STORAGES = {
         "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
     },
     "staticfiles": {
-        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
     },
 }
 
@@ -153,7 +154,6 @@ JAZZMIN_SETTINGS = {
     "copyright": "Inventário - Sistema de Gestão",
 }
 
-
 JAZZMIN_UI_TWEAKS = {
     "theme": "darkly",
     "dark_mode_theme": "darkly",
@@ -161,7 +161,6 @@ JAZZMIN_UI_TWEAKS = {
     "sidebar": "sidebar-dark-primary",
     "accent": "accent-primary",
     "brand_colour": "navbar-dark",
-
 
     "button_classes": {
         "primary": "btn-primary",
