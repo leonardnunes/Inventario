@@ -74,6 +74,8 @@ USE_I18N = True
 USE_TZ = True
 USE_THOUSAND_SEPARATOR = True
 
+WHITENOISE_MANIFEST_STRICT = False
+
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
@@ -185,3 +187,5 @@ JAZZMIN_UI_TWEAKS = {
         "success": "btn-success"
     }
 }
+
+
