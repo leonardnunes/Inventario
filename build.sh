@@ -3,5 +3,5 @@
 set -o errexit
 
 pip install -r requirements.txt
-python manage.py collectstatic --clear --no-input
+python manage.py collectstatic --ignore vendor/bootswatch --clear --no-input
 python manage.py migrate
