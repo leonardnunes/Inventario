@@ -144,56 +144,78 @@
         </div>
     </div>
 
-    <div class="d-flex flex-wrap align-items-center gap-3 mb-4 p-3 rounded-3" style="background: rgba(14, 165, 233, 0.05); border: 1px solid rgba(14, 165, 233, 0.2);">
-        <div class="d-flex align-items-center me-auto">
-            <div class="rounded-circle d-flex justify-content-center align-items-center me-3 shadow-sm" style="width: 36px; height: 36px; background: rgba(14, 165, 233, 0.2);">
-                <i class="bi bi-printer text-info"></i>
+    <div class="card border-0 mb-4 shadow-sm" style="background: rgba(255,255,255,0.02); border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
+        <div class="card-body p-3 d-flex flex-column flex-xl-row align-items-xl-center gap-3">
+
+            <div class="d-flex align-items-center me-xl-auto">
+                <div class="rounded-circle d-flex justify-content-center align-items-center me-3 shadow-sm" style="width: 36px; height: 36px; background: rgba(14, 165, 233, 0.1);">
+                    <i class="bi bi-printer text-info"></i>
+                </div>
+                <span class="text-info small fw-bold text-uppercase tracking-wide" style="letter-spacing: 0.05rem;">Auditoria & Impressão</span>
             </div>
-            <span class="text-info small fw-bold text-uppercase tracking-wide">Auditoria & Impressão</span>
+
+            {% if perms.core.can_print_label %}
+            <div class="d-flex flex-column flex-lg-row gap-3 align-items-lg-center w-100 w-xl-auto">
+
+                <div class="d-flex flex-column flex-sm-row gap-2 w-100 w-lg-auto">
+                    <input type="text" id="intervalo-inicio" class="form-control form-control-sm border-0 text-center shadow-none focus-ring focus-ring-info" style="background: rgba(0,0,0,0.3); min-width: 130px; color: #fff;" placeholder="De: INN-000001">
+                    <input type="text" id="intervalo-fim" class="form-control form-control-sm border-0 text-center shadow-none focus-ring focus-ring-info" style="background: rgba(0,0,0,0.3); min-width: 130px; color: #fff;" placeholder="Até: INN-000100">
+                    <button type="button" id="btn-imprimir-intervalo" class="btn btn-sm btn-outline-info text-nowrap fw-medium px-3 shadow-sm hover-elevate">
+                        <i class="bi bi-qr-code-scan me-1"></i> Gerar QR
+                    </button>
+                </div>
+
+                <div class="vr mx-1 d-none d-lg-block" style="color: rgba(255,255,255,0.2);"></div>
+
+            <div class="btn-group w-100 w-lg-auto shadow-sm">
+                <a href="{% url 'core:gerar_relatorio' %}?q={{ request.GET.q|default:'' }}&departamento={{ request.GET.departamento|default:'' }}&status={{ request.GET.status|default:'' }}"
+                   id="btn-gerar-relatorio" class="btn btn-sm px-3 hover-elevate d-flex align-items-center justify-content-center gap-2" style="background: rgba(255,255,255,0.05); color: #e2e8f0; border: 1px solid rgba(255,255,255,0.1); border-right: none;" target="_blank">
+                    <i class="bi bi-file-earmark-pdf text-danger"></i> Relatório Geral
+                </a>
+                <button type="button" class="btn btn-sm dropdown-toggle dropdown-toggle-split px-2 d-flex align-items-center justify-content-center" data-bs-toggle="dropdown" aria-expanded="false" style="background: rgba(255,255,255,0.05); color: #e2e8f0; border: 1px solid rgba(255,255,255,0.1); border-left: 1px solid rgba(255,255,255,0.08);">
+                    <span class="visually-hidden">Toggle Dropdown</span>
+                </button>
+
+                <ul class="dropdown-menu dropdown-menu-dark shadow-lg border-0 mt-2 custom-scrollbar" style="background: #1e1e24; border: 1px solid rgba(255,255,255,0.1) !important; border-radius: 8px; max-height: 400px; overflow-y: auto; min-width: 220px;">
+
+                    <li>
+                        <a class="dropdown-item py-2 d-flex align-items-center gap-2 text-info fw-medium" href="{% url 'core:gerar_relatorio' %}?q={{ request.GET.q|default:'' }}&departamento={{ request.GET.departamento|default:'' }}&status={{ request.GET.status|default:'' }}" target="_blank">
+                            <i class="bi bi-printer"></i> Relatório Completo
+                        </a>
+                    </li>
+
+                    <li><hr class="dropdown-divider border-secondary opacity-25"></li>
+
+                    <li><h6 class="dropdown-header text-uppercase text-muted" style="font-size: 0.7rem; letter-spacing: 0.05rem;">Por Departamento</h6></li>
+                    {% for depto in departamentos %}
+                    <li>
+                        <a class="dropdown-item py-2 d-flex align-items-center gap-2 text-light" href="{% url 'core:gerar_relatorio' %}?departamento={{ depto.id }}&q={{ request.GET.q|default:'' }}&status={{ request.GET.status|default:'' }}" target="_blank">
+                            <i class="bi bi-building opacity-75 text-muted"></i> {{ depto.nome }}
+                        </a>
+                    </li>
+                    {% empty %}
+                    <li><span class="dropdown-item py-2 text-muted small fst-italic">Nenhum cadastrado</span></li>
+                    {% endfor %}
+
+                    <li><hr class="dropdown-divider border-secondary opacity-25"></li>
+
+                    <li><h6 class="dropdown-header text-uppercase text-muted" style="font-size: 0.7rem; letter-spacing: 0.05rem;">Por Categoria</h6></li>
+                    {% for categoria in categorias %}
+                    <li>
+                        <a class="dropdown-item py-2 d-flex align-items-center gap-2 text-light" href="{% url 'core:gerar_relatorio' %}?categoria={{ categoria.id }}&q={{ request.GET.q|default:'' }}&status={{ request.GET.status|default:'' }}" target="_blank">
+                            <i class="bi bi-tags opacity-75 text-muted"></i> {{ categoria.nome }}
+                        </a>
+                    </li>
+                    {% empty %}
+                    <li><span class="dropdown-item py-2 text-muted small fst-italic">Nenhuma cadastrada</span></li>
+                    {% endfor %}
+                </ul>
+            </div>
+
         </div>
-
-        {% if perms.core.can_print_label %}
-        <div class="d-flex flex-wrap gap-2 w-100">
-        <div class="d-flex gap-2 flex-grow-1">
-            <input type="text" id="intervalo-inicio" class="form-control form-control-sm border-0 text-center" style="background: rgba(0,0,0,0.3); flex: 1; min-width: 100px; color: #fff;" placeholder="De: INN-000001">
-            <input type="text" id="intervalo-fim" class="form-control form-control-sm border-0 text-center" style="background: rgba(0,0,0,0.3); flex: 1; min-width: 100px; color: #fff;" placeholder="Até: INN-000100">
+            {% endif %}
         </div>
-
-        <a href="#" id="btn-imprimir-intervalo" class="btn btn-sm btn-info text-dark fw-medium px-3 shadow-sm hover-elevate" style="min-width: 100px;">
-            <i class="bi bi-qr-code me-1"></i> Gerar QR
-        </a>
     </div>
-
-    <div class="vr mx-2 d-none d-md-block" style="color: rgba(255,255,255,0.2);"></div>
-
-    <div class="btn-group w-100 w-md-auto">
-        <a href="{% url 'core:gerar_relatorio' %}?q={{ request.GET.q|default:'' }}&departamento={{ request.GET.departamento|default:'' }}&status={{ request.GET.status|default:'' }}"
-           id="btn-gerar-relatorio" class="btn btn-sm btn-outline-light px-3 hover-elevate flex-grow-1" target="_blank">
-            <i class="bi bi-file-earmark-pdf me-1"></i> Relatório PDF
-        </a>
-        <button type="button" class="btn btn-sm btn-outline-light dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false"></button>
-
-        <ul class="dropdown-menu dropdown-menu-dark shadow border-0" style="background: #1e1e24; max-height: 400px; overflow-y: auto;">
-            <li><a class="dropdown-item text-info fw-medium" href="{% url 'core:gerar_relatorio' %}?q={{ request.GET.q|default:'' }}&status={{ request.GET.status|default:'' }}" target="_blank"><i class="bi bi-printer me-2"></i> Relatório Completo</a></li>
-            <li><hr class="dropdown-divider border-secondary opacity-25"></li>
-            <li><h6 class="dropdown-header text-uppercase text-light opacity-50 small" style="letter-spacing: 0.05rem;">Por Departamento</h6></li>
-            {% for depto in departamentos %}
-                <li><a class="dropdown-item text-light hover-bg-dark" href="{% url 'core:gerar_relatorio' %}?q={{ request.GET.q|default:'' }}&status={{ request.GET.status|default:'' }}&departamento={{ depto.id }}" target="_blank"><i class="bi bi-building text-muted me-2"></i> {{ depto.nome }}</a></li>
-            {% empty %}
-                <li><span class="dropdown-item text-muted small">Nenhum departamento</span></li>
-            {% endfor %}
-            <li><hr class="dropdown-divider border-secondary opacity-25"></li>
-            <li><h6 class="dropdown-header text-uppercase text-light opacity-50 small" style="letter-spacing: 0.05rem;">Por Categoria</h6></li>
-            {% for categoria in categorias %}
-                <li><a class="dropdown-item text-light" href="{% url 'core:gerar_relatorio' %}?q={{ request.GET.q|default:'' }}&status={{ request.GET.status|default:'' }}&categoria={{ categoria.id }}" target="_blank"><i class="bi bi-tag text-muted me-2"></i> {{ categoria.nome }}</a></li>
-            {% empty %}
-                <li><span class="dropdown-item text-muted small">Nenhuma categoria</span></li>
-            {% endfor %}
-        </ul>
-    </div>
-        {% endif %}
-    </div>
-
     <div class="card border-0 p-3 shadow-sm mb-4 position-relative" style="background: rgba(255,255,255,0.02); border-radius: 12px;">
 
         <div class="skeleton-overlay position-absolute w-100 h-100 top-0 start-0 p-4 pt-5 mt-2" style="background: rgba(30,30,36, 0.9);">

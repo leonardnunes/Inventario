@@ -183,15 +183,17 @@
             </div>
         </div>
 
-        <div class="d-flex align-items-center justify-content-end gap-3 pt-3 border-top" style="border-color: rgba(255,255,255,0.05) !important;">
+        <div class="d-flex flex-column flex-sm-row justify-content-sm-end align-items-stretch gap-3 pt-3 border-top" style="border-color: rgba(255,255,255,0.05) !important;">
+
             {% if object %}
-                <a href="{% url 'core:equipamento_detalhe' object.pk %}" class="btn btn-outline-light px-4 py-2 hover-elevate" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);">Cancelar</a>
+                <a href="{% url 'core:equipamento_detalhe' object.pk %}" class="btn d-flex align-items-center justify-content-center hover-elevate px-4 py-2 order-2 order-sm-1" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #e2e8f0;">Cancelar</a>
             {% else %}
-                <a href="{% url 'core:lista_equipamentos' %}" class="btn btn-outline-light px-4 py-2 hover-elevate" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);">Cancelar</a>
+                <a href="{% url 'core:lista_equipamentos' %}" class="btn d-flex align-items-center justify-content-center hover-elevate px-4 py-2 order-2 order-sm-1" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #e2e8f0;">Cancelar</a>
             {% endif %}
 
-            <button type="submit" class="btn px-5 py-2 shadow hover-elevate text-white fw-bold" style="background: linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%); border: none;">
-                <i class="bi bi-check2-circle me-2"></i>Salvar Equipamento
+            <button type="submit" class="btn text-white fw-bold shadow hover-elevate d-flex align-items-center justify-content-center gap-2 px-5 py-2 order-1 order-sm-2" style="background: linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%); border: none;">
+                <i class="bi bi-check2-circle fs-5"></i>
+                <span>Salvar Equipamento</span>
             </button>
         </div>
     </form>
