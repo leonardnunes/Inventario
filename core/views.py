@@ -82,7 +82,6 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         return context
 
 
-
 class EquipamentoListView(PermissionRequiredMixin, ListView):
     permission_required = 'core.view_equipamento'
     model = Equipamento
@@ -90,12 +89,11 @@ class EquipamentoListView(PermissionRequiredMixin, ListView):
     context_object_name = 'equipamentos'
     paginate_by = 50
 
-    def get_queryset(self):
-        queryset = super().get_queryset().select_related('departamento', 'categoria', 'localizacao')
+    def get_base_queryset(self):
+        queryset = Equipamento.objects.select_related('departamento', 'categoria', 'localizacao')
 
         query = self.request.GET.get('q', '')
         departamento_id = self.request.GET.get('departamento', '')
-        status_param = self.request.GET.get('status', '')
 
         if query:
             queryset = queryset.filter(
@@ -109,6 +107,11 @@ class EquipamentoListView(PermissionRequiredMixin, ListView):
         if departamento_id:
             queryset = queryset.filter(departamento__id=departamento_id)
 
+        return queryset
+
+    def get_queryset(self):
+        queryset = self.get_base_queryset()
+        status_param = self.request.GET.get('status', '')
         if status_param:
             queryset = queryset.filter(situacao=status_param)
 
@@ -116,13 +119,13 @@ class EquipamentoListView(PermissionRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        qs_filtrada = self.get_queryset()
+        qs_base = self.get_base_queryset()
 
         context.update({
-            'total_equipamentos': qs_filtrada.count(),
-            'total_disponivel': qs_filtrada.filter(situacao='disponivel').count(),
-            'total_em_uso': qs_filtrada.filter(situacao='em_uso').count(),
-            'total_manutencao': qs_filtrada.filter(situacao='manutencao').count(),
+            'total_equipamentos': qs_base.count(),
+            'total_disponivel': qs_base.filter(situacao='disponivel').count(),
+            'total_em_uso': qs_base.filter(situacao='em_uso').count(),
+            'total_manutencao': qs_base.filter(situacao='manutencao').count(),
             'status_atual': self.request.GET.get('status', ''),
             'departamento_selecionado_id': self.request.GET.get('departamento', ''),
             'query_atual': self.request.GET.get('q', ''),
